@@ -31,8 +31,8 @@ def process_file(path):
 
     results = [[pfx, int(key), val[0], val[1]] for key, val in results.items()]
     results.sort(key=lambda x: x[1])
+    print "file: {}    # regions: {}".format(os.path.basename(path), len(results))
     regions.extend(results)
-
 
 
 
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     files = [os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")]
     # print files
     for file in files:
+        # print file
         try:
             process_file(file)
         except Exception as e:

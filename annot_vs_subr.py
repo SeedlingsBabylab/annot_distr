@@ -14,6 +14,7 @@ def inside_regions(regions, annots):
                            for i, reg in regions.iterrows()))
     return results
 
+
 def inside(x, reg):
     if reg.onset <= x.onset <= reg.offset:
         return True

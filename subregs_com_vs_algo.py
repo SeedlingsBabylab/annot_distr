@@ -1,7 +1,7 @@
 import pandas as pd
 
 coms = pd.read_csv("orig_subreg_comments.csv")
-algo = pd.read_csv("all_cha_top5_subregions.csv")
+algo = pd.read_csv("all_cha_top5.csv")
 
 
 coms['fprefix'] = coms.file.str[:5]
@@ -14,7 +14,7 @@ def region_exists(reg, algo_regs):
     return False
 
 
-def close(ts, other, window=900000):
+def close(ts, other, window=0):
     # if ts.fprefix == "01_10" and ts.onset == 35399580 and other.onset == 35400000:
     #     print
     start_match = (other.onset - window) <= ts.onset <= (other.onset + window)
