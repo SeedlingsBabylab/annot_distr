@@ -12,6 +12,12 @@ def pull_regions(path):
     end_extras = []
     begin_makeup = []
     end_makeup = []
+    begin_skip = []
+    end_skip = []
+    begin_subreg = []
+    end_subreg = []
+    begin_sil = []
+    end_sil = []
 
     with open(path, "rU") as input:
         lines = []
@@ -28,6 +34,24 @@ def pull_regions(path):
             elif "end makeup region" in line:
                 ts = get_last_timestamp(lines)
                 end_makeup.append(ts)
+            elif "begin skip" in line:
+                ts = get_last_timestamp(lines)
+                begin_skip.append(ts)
+            elif "end skip" in line:
+                ts = get_last_timestamp(lines)
+                end_skip.append(ts)
+            elif "subregion" in line and "starts" in line:
+                ts = get_last_timestamp(lines)
+                begin_subreg.append(ts)
+            elif "subregion" in line and "ends" in line:
+                ts = get_last_timestamp(lines)
+                end_subreg.append(ts)
+            elif "silence" in line and "starts" in line:
+                ts = get_last_timestamp(lines)
+                begin_sil.append(ts)
+            elif "silence" in line and "ends" in line:
+                ts = get_last_timestamp(lines)
+                end_sil.append(ts)
             else:
                 lines.append(line)
 
@@ -35,8 +59,15 @@ def pull_regions(path):
         raise Exception("EXTRA: begin count does not match end count")
     elif len(begin_makeup) != len(end_makeup):
         raise Exception("MAKEUP: begin count does not match end count")
+    elif len(begin_skip) != len(end_skip):
+        raise Exception("SKIP: begin count does not match end count")
+    elif len(begin_sil) != len(end_sil):
+        raise Exception("SILENCE: begin count does not match end count")
     else:
-        return begin_extras, end_extras, begin_makeup, end_makeup
+        return begin_extras, end_extras, begin_makeup, \
+               end_makeup, begin_skip, end_skip,\
+               begin_subreg, end_subreg, begin_sil,\
+               end_sil
 
 
 def get_last_timestamp(lines):
@@ -44,6 +75,7 @@ def get_last_timestamp(lines):
         m = interval_regx.findall(line)
         if m and len(m) == 1:
             return int(m[0].split("_")[1])
+    return 0
 
 def sum_regions(begins, ends):
     joined = zip(begins, ends)
@@ -53,6 +85,37 @@ def sum_regions(begins, ends):
             raise Exception("begin is after end: begin: {}  end: {}".format(x[0], x[1]))
         total += x[1] - x[0]
     return total
+
+def sil_subr_overlap_sum(month,
+                         b_sil, e_sil,
+                         b_sub, e_sub,
+                         b_mak, e_mak):
+
+    """
+    sum of all silence +subregion overlap time
+    :param month:
+    :param b_sil: silence onsets
+    :param e_sil: silence offsets
+    :param b_sub: subregion onsets
+    :param e_sub: subregion offsets
+    :param b_mak: makeup onsets
+    :param e_mak: makeup offsets
+    :return: total silence overlap time
+    """
+    subregs = zip(b_sub, e_sub)
+    sils = zip(b_sil, e_sil)
+    makeups = zip(b_mak, e_mak)
+
+    for silreg in sils:
+        region_overlap(silreg, subregs)
+
+def region_overlap(sil, subregs):
+    for reg in subregs:
+        if reg[0] < sil[0] < reg[1]:
+            if reg[0] < sil[1] < reg[1]:
+
+
+
 
 if __name__ == "__main__":
 
@@ -64,13 +127,16 @@ if __name__ == "__main__":
     results = []
 
 
-
     for file in files:
         fname = os.path.basename(file)
+
         extra_sum = 0
         makeup_sum = 0
+        skip_sum = 0
         try:
-            b_extra, e_extra, b_makup, e_makup = pull_regions(file)
+            b_extra, e_extra, b_makup, e_makup, \
+            b_skip, e_skip, b_subr, e_subr, b_sil, \
+            e_sil  = pull_regions(file)
             if b_extra:
                 try:
                     extra_sum = sum_regions(b_extra, e_extra)
@@ -85,9 +151,21 @@ if __name__ == "__main__":
                     print fname
                     print e
                     print
+            if b_skip:
+                try:
+                    skip_sum = sum_regions(b_skip, e_skip)
+                except Exception as e:
+                    print fname
+                    print e
+                    print
+            if b_sil:
+                try:
+                    overlap_sum = sil_subr_overlap_sum(int(fname[3:5]),
+                                                       b_sil, e_sil,
+                                                       b_subr, e_subr,
+                                                       b_makup, e_makup)
 
-            # print "extra: {}      makeup: {}".format(extra_sum, makeup_sum)
-            results.append((os.path.basename(file)[:5], extra_sum, makeup_sum))
+            results.append((os.path.basename(file)[:5], extra_sum, makeup_sum, skip_sum))
         except Exception as e:
             print fname
             print e
@@ -95,5 +173,5 @@ if __name__ == "__main__":
 
 
 
-    df = pd.DataFrame(results, columns=["file", "extra", "makeup"])
+    df = pd.DataFrame(results, columns=["file", "extra", "makeup", "skip"])
     df.to_csv("total_listened_time.csv", index=False)
