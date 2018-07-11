@@ -113,7 +113,7 @@ def region_overlap(sil, subregs):
     for reg in subregs:
         if reg[0] < sil[0] < reg[1]:
             if reg[0] < sil[1] < reg[1]:
-
+                print
 
 
 
@@ -164,8 +164,11 @@ if __name__ == "__main__":
                                                        b_sil, e_sil,
                                                        b_subr, e_subr,
                                                        b_makup, e_makup)
+                except:
+                    print
 
             results.append((os.path.basename(file)[:5], extra_sum, makeup_sum, skip_sum))
+
         except Exception as e:
             print fname
             print e

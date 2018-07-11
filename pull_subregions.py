@@ -50,5 +50,5 @@ if __name__ == "__main__":
             print e
 
     df = pd.DataFrame(regions, columns=['file', 'reg_num', 'onset', 'offset'])
-    df.to_csv("subregions_poop2.csv", index=False)
+    df.to_csv("subregions.csv", index=False)
 

@@ -14,7 +14,7 @@ def region_exists(reg, algo_regs):
     return False
 
 
-def close(ts, other, window=0):
+def close(ts, other, window=1000):
     # if ts.fprefix == "01_10" and ts.onset == 35399580 and other.onset == 35400000:
     #     print
     start_match = (other.onset - window) <= ts.onset <= (other.onset + window)
@@ -31,6 +31,8 @@ def close(ts, other, window=0):
 
 problems = []
 for i, f in coms.groupby('fprefix'):
+    if i == "03_08":
+        print
     for j, r in f.iterrows():
         algo_regs = algo.query("file == \"{}\"".format(i))
         if not region_exists(r, algo_regs):
@@ -41,7 +43,7 @@ probs = pd.DataFrame(problems, columns=['file', 'onset'])
 probs['subject'] = probs.file.str[0:2]
 probs['month'] = probs.file.str[3:5]
 
-probs.to_csv("subreg_comment_not_in_orig_algo_output.csv", index=False)
+probs.to_csv("subreg_comment_not_in_orig_algo_output_1_SECOND_WINDOW.csv", index=False)
 
 
 
