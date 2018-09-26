@@ -14,13 +14,16 @@ def process_file(path):
     results = {}
     cf = pc.ClanFile(path)
     pfx = cf.filename[:5]
+    # get all comments that contain subregion and sort by offset
     subrs = filter(lambda x: "subregion" in x.line, cf.get_user_comments())
     subrs.sort(key=lambda x: x.offset)
+    # should have two subregions
     if len(subrs) % 2 != 0:
         raise Exception
 
     for x in subrs:
         m = subr_regx.findall(x.line)
+        # should only be one regex match
         if len(m) > 1:
             raise Exception
         m=m[0]
@@ -29,26 +32,23 @@ def process_file(path):
         else:
             results[m[0]].append(x.offset)
 
+    # filename, subregion index, subregion 1, subregion 2
     results = [[pfx, int(key), val[0], val[1]] for key, val in results.items()]
-    results.sort(key=lambda x: x[1])
-    print "file: {}    # regions: {}".format(os.path.basename(path), len(results))
     regions.extend(results)
+
 
 
 
 if __name__ == "__main__":
 
+    #get subregion from all cha file in the directory, print file name if exception
     cha_dir = sys.argv[1]
     files = [os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")]
-    # print files
     for file in files:
-        # print file
         try:
             process_file(file)
-        except Exception as e:
+        except:
             print os.path.basename(file)
-            print e
 
     df = pd.DataFrame(regions, columns=['file', 'reg_num', 'onset', 'offset'])
     df.to_csv("subregions.csv", index=False)
-
