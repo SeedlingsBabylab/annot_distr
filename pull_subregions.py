@@ -17,22 +17,25 @@ def process_file(path):
     # get all comments that contain subregion and sort by offset
     subrs = filter(lambda x: "subregion" in x.line, cf.get_user_comments())
     subrs.sort(key=lambda x: x.offset)
-    # should have two subregions
+    # subregion lines should be in pairs
     if len(subrs) % 2 != 0:
         raise Exception
 
     for x in subrs:
         m = subr_regx.findall(x.line)
-        # should only be one regex match
+        # each subregion line should only have one regex match
         if len(m) > 1:
             raise Exception
         m=m[0]
+        # each subregion index should have two subregion lines,
+        # and the smaller offset of the lines should be the onset of subregion,
+        # larger offset of the lines be the offset
         if m[0] not in results:
             results[m[0]] = [x.offset]
         else:
             results[m[0]].append(x.offset)
 
-    # filename, subregion index, subregion 1, subregion 2
+    # filename, subregion index, onset, offset
     results = [[pfx, int(key), val[0], val[1]] for key, val in results.items()]
     regions.extend(results)
 
