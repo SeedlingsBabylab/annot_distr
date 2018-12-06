@@ -1,0 +1,34 @@
+---
+title: "annotation_time"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r load_libraries}
+library(tidyverse)
+```
+
+```{r load_data}
+data_annotation <- read_csv("~/apply_on_all/total_listened_time.csv")
+
+```
+
+```{r clean_data}
+colnames(data_annotation) <- c("file", "extra", "makeup", "skip", "overlap", "subregions")
+
+data_annotation_clean <- data_annotation %>%
+  separate(file, c("subject", "month"), "_") %>%
+  filter(month != "06" & month != "07")
+
+```
+
+```{r first_dive}
+
+data_annotation_clean %>%
+  filter(subject == "39")
+```
+
