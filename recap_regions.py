@@ -6,7 +6,7 @@ import os.path
 import pandas as pd
 
 
-subr_regx = re.compile('subregion (\d+) of (\d+)')
+subr_regx = re.compile('subregion (\d*) ?of (\d*)') # There are some cases where the numbering is missing
 keyword_list = ["subregion", "silence", "skip", "makeup", "make-up", "make up"]
 
 
@@ -44,6 +44,8 @@ def pull_regions(path):
                 if sub_start is not None:
                     issues.append([sub_start.index, sub_start.line, "subregion without end"])
                     continue
+                if len(m[0])<2:
+                    issues.append([cline.index, line, "subregion without incorrect numbering"])
                 sub_start = cline
                 skip_count = 0
                 skip_time = 0
@@ -233,16 +235,18 @@ def pull_regions(path):
 
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
-    files = [os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")]
+    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
+    #files = ['../all_cha/03_12_sparse_code.cha']
     regions = []
     issues = []
     for file in files:
+        print "Checking {}".format(os.path.basename(file))
         issues_file, results = pull_regions(file)
         file_regions = [[os.path.basename(file), len(results), "subregion {} of {}".format(sub[0], sub[1])]+results[sub] for sub in results.keys()]
         issues_file = [[os.path.basename(file)]+iss for iss in issues_file]
         regions.extend(file_regions)
         issues.extend(issues_file)
-        print "finish {}".format(os.path.basename(file))
+        print "Finished {}".format(os.path.basename(file))
 
     df = pd.DataFrame(regions, columns=['file', 'subregion_count', 'current_subregion', 'skip_count', 'skip_time', 'extra_count', 'extra_time', 'makeup_count', 'makeup_time', 'silence_time'])
     df_issue = pd.DataFrame(issues, columns=['file', 'line_index', 'line', 'issue'])
