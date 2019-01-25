@@ -98,6 +98,7 @@ if __name__ == "__main__":
     cha_dir = sys.argv[1]
     files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
     #files = ['../all_cha/03_12_sparse_code.cha']
+    file_with_error = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
         sequence = pull_regions(file)
@@ -111,5 +112,12 @@ if __name__ == "__main__":
             f.write('\n'.join(error_list))
         if error_list:
             print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
+            file_with_error.append((os.path.basename(file), error_list))
         else:
             print("Finished {}".format(os.path.basename(file)))
+        with open('../output/summary.txt', 'w') as f:
+            for entry in file_with_error:
+                f.write(entry[0]+'\n')
+                for error in entry[1]:
+                    f.write('\t\t\t\t'+error+'\n')
+                f.write('\n')
