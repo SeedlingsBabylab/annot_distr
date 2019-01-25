@@ -99,8 +99,7 @@ def total_listen_time(cf, region_map):
         skip_start_times = region_map['skip']['starts']
         skip_end_times = region_map['skip']['ends']
         assert(len(skip_start_times)==len(skip_end_times))
-        #for region_type in ['makeup', 'silence', 'subregion', 'extra']:
-        for region_type in ['silence']:
+        for region_type in ['makeup', 'silence', 'subregion', 'extra']:
             region_start_times = region_map[region_type]['starts']
             region_end_times = region_map[region_type]['ends']
             assert(len(region_start_times)==len(region_end_times))
@@ -112,7 +111,41 @@ def total_listen_time(cf, region_map):
                         del region_start_times[j]
 
     def remove_silence_regions_outside_subregions():
-        pass
+        silence_start_times = region_map['silence']['starts']
+        silence_end_times = region_map['silence']['ends']
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        for i in range(len(silence_start_times)-1, -1, -1):
+            remove = True
+            for j in range(len(subregion_start_times)):
+                if subregion_start_times[j]<=silence_start_times[i] and subregion_end_times[j]>=silence_end_times[i]:
+                    remove = False
+                    break
+            if remove:
+                del silence_start_times[i]
+                del silence_end_times[i]
+
+    '''
+        TODO:
+        Assumption: if a subregion has nested makeup region, that means there should not be any other annotations outside the nested makeup region
+                    but inside the subregion (i.e. the subregion could be discounted)
+
+        This assumption needs to be verified
+    '''
+    def remove_subregions_with_nested_makeup():
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        makeup_start_times = region_map['makeup']['starts']
+        makeup_end_times = region_map['makeup']['ends']
+        for i in range(len(subregion_start_times)-1, -1, -1):
+            remove = False
+            for j in range(len(makeup_start_times)):
+                if subregion_start_times[i]<=makeup_start_times[j] and subregion_end_times[i]>=makeup_end_times[j]:
+                    remove = True
+                    break
+            if remove:
+                del subregion_start_times[i]
+                del subregion_end_times[i]
 
     def annotated_subregion_time():
         start_times = region_map['subregion']['starts']
@@ -161,7 +194,11 @@ def total_listen_time(cf, region_map):
         return total_time
 
 
+    # Preprocessing
     remove_regions_nested_in_skip()
+    remove_silence_regions_outside_subregions()
+    remove_subregions_with_nested_makeup()
+
     subregion_time = annotated_subregion_time()
     skip_time = skip_region_time()
     silence_time = silence_region_time()
@@ -173,7 +210,7 @@ def total_listen_time(cf, region_map):
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['../all_cha/01_06_sparse_code_id.cha']
+    files = ['../all_cha/03_12_sparse_code.cha']
     file_with_error = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
