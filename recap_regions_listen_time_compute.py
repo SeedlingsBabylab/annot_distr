@@ -16,8 +16,8 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-subr_regx = re.compile('subregion (\d*) ?of (\d*)') # There are some cases where the numbering is missing
-code_regx = re.compile('([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
+subr_regx = re.compile(r'subregion (\d*) ?of (\d*)') # There are some cases where the numbering is missing
+code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
 keyword_rank = {"subregion": 1, "skip": 2, "silence": 3, "makeup": 4, "extra": 5}
 
@@ -210,7 +210,7 @@ def total_listen_time(cf, region_map):
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['../all_cha/01_10_sparse_code.cha']
+    files = ['../all_cha/03_13_sparse_code.cha']
     file_with_error = []
     listen_time_summary = []
     for file in files:
