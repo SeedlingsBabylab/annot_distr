@@ -205,19 +205,19 @@ def total_listen_time(cf, region_map):
     extra_time = extra_region_time()
     makeup_time = makeup_region_time()
 
-    print(subregion_time+makeup_time+extra_time-silence_time-skip_time)
+    return subregion_time, makeup_time, extra_time, silence_time, skip_time
 
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['../all_cha/03_12_sparse_code.cha']
+    files = ['../all_cha/01_10_sparse_code.cha']
     file_with_error = []
+    listen_time_summary = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
         sequence, cf = pull_regions(file)
         sequence_minimal_error_sorting(sequence)
         error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
-        total_listen_time(cf, region_map)
         with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
             f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
             f.write('\n')
@@ -228,10 +228,19 @@ if __name__ == "__main__":
             print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
             file_with_error.append((os.path.basename(file), error_list))
         else:
-            print("Finished {}".format(os.path.basename(file)))
-        with open('../output/summary.txt', 'w') as f:
-            for entry in file_with_error:
-                f.write(entry[0]+'\n')
-                for error in entry[1]:
-                    f.write('\t\t\t\t'+error+'\n')
-                f.write('\n')
+            listen_time = total_listen_time(cf, region_map)
+            listen_time_summary.append((os.path.basename(file), listen_time))
+            print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
+    with open('../output/summary.txt', 'w') as f:
+        for entry in file_with_error:
+            f.write(entry[0]+'\n')
+            for error in entry[1]:
+                f.write('\t\t\t\t'+error+'\n')
+            f.write('\n')
+    with open('../output/listen_time_summary.csv', 'w') as f:
+        for entry in listen_time_summary:
+            f.write(entry[0]+',')
+            f.write(','.join([str(x) for x in entry[1]]))
+            f.write(',')
+            f.write(str(entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4]))
+            f.write('\n')
