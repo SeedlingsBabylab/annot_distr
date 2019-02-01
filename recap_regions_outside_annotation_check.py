@@ -94,37 +94,13 @@ def sequence_missing_repetition_entry_alert(sequence):
             error_list.append(item + ' starts repetition')
     return error_list, region_map
 
-def total_listen_time(cf, region_map):
-    def remove_regions_nested_in_skip():
-        skip_start_times = region_map['skip']['starts']
-        skip_end_times = region_map['skip']['ends']
-        assert(len(skip_start_times)==len(skip_end_times))
-        for region_type in ['makeup', 'silence', 'subregion', 'extra']:
-            region_start_times = region_map[region_type]['starts']
-            region_end_times = region_map[region_type]['ends']
-            assert(len(region_start_times)==len(region_end_times))
-            for i in range(len(skip_start_times)):
-                for j in range(len(region_start_times)-1, -1, -1):
-                    if skip_start_times[i]<=region_start_times[j] and skip_end_times[i]>=region_end_times[j]:
-                        #print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
-                        del region_end_times[j]
-                        del region_start_times[j]
-
-    def remove_silence_regions_outside_subregions():
-        silence_start_times = region_map['silence']['starts']
-        silence_end_times = region_map['silence']['ends']
-        subregion_start_times = region_map['subregion']['starts']
-        subregion_end_times = region_map['subregion']['ends']
-        for i in range(len(silence_start_times)-1, -1, -1):
-            remove = True
-            for j in range(len(subregion_start_times)):
-                if subregion_start_times[j]<=silence_start_times[i] and subregion_end_times[j]>=silence_end_times[i]:
-                    remove = False
-                    break
-            if remove:
-                del silence_start_times[i]
-                del silence_end_times[i]
-
+'''
+    Sieve out annotations that do not belong to one of the following cases:
+    1. Inside extra region
+    2. Inside subregion
+    3. Inside makeup region but not inside subregion
+'''
+def outside_annotation_check(cf, region_map):
     '''
         TODO:
         Assumption: if a subregion has nested makeup region, that means there should not be any other annotations outside the nested makeup region
@@ -147,72 +123,46 @@ def total_listen_time(cf, region_map):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
 
-    def annotated_subregion_time():
-        start_times = region_map['subregion']['starts']
-        end_times = region_map['subregion']['ends']
-        total_time = 0
-        for i in range(len(start_times)):
-            lines = cf.get_within_time(begin=start_times[i], end=end_times[i]).line_map
-            for line in lines:
-                annot = code_regx.findall(line.line)
-                if annot:
-                    total_time += end_times[i] - start_times[i] # +1?
-                    break
-        return total_time
+    def is_inside_extra_region(offset):
+        for i in range(len(region_map['extra']['starts'])):
+            if offset>=region_map['extra']['starts'][i] and offset<=region_map['extra']['ends'][i]:
+                return True
+        return False
     
-    # I have those functions all separated in case we need to make modifications to the way we compute listen time for each region
-    def skip_region_time():
-        start_times = region_map['skip']['starts']
-        end_times = region_map['skip']['ends']
-        total_time = 0
-        for i in range(len(start_times)):
-            total_time += end_times[i] - start_times[i]
-        return total_time
+    def is_inside_makeup_region(offset):
+        for i in range(len(region_map['makeup']['starts'])):
+            if offset>=region_map['makeup']['starts'][i] and offset<=region_map['makeup']['ends'][i]:
+                return True
+        return False
 
-    def silence_region_time():
-        start_times = region_map['silence']['starts']
-        end_times = region_map['silence']['ends']
-        total_time = 0
-        for i in range(len(start_times)):
-            total_time += end_times[i] - start_times[i]
-        return total_time
+    def is_inside_subregion(offset):
+        for i in range(len(region_map['subregion']['starts'])):
+            if offset>=region_map['subregion']['starts'][i] and offset<=region_map['subregion']['ends'][i]:
+                return True
+        return False
 
-    def extra_region_time():
-        start_times = region_map['extra']['starts']
-        end_times = region_map['extra']['ends']
-        total_time = 0
-        for i in range(len(start_times)):
-            total_time += end_times[i] - start_times[i]
-        return total_time
+    def logical_or(offset, functions):
+        for f in functions:
+            if f(offset):
+                return True
+        return False
 
-    def makeup_region_time():
-        start_times = region_map['makeup']['starts']
-        end_times = region_map['makeup']['ends']
-        total_time = 0
-        for i in range(len(start_times)):
-            total_time += end_times[i] - start_times[i]
-        return total_time
-
-
-    # Preprocessing
-    remove_regions_nested_in_skip()
-    remove_silence_regions_outside_subregions()
     remove_subregions_with_nested_makeup()
-
-    subregion_time = annotated_subregion_time()
-    skip_time = skip_region_time()
-    silence_time = silence_region_time()
-    extra_time = extra_region_time()
-    makeup_time = makeup_region_time()
-
-    return subregion_time, makeup_time, extra_time, silence_time, skip_time
+    annotations = cf.annotations()
+    conditions = [is_inside_extra_region, is_inside_makeup_region, is_inside_subregion]
+    outside_annots = []
+    for annot in annotations:
+        if not logical_or(annot.offset, conditions):
+            outside_annots.append(annot)
+    return outside_annots
+            
 
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
-    #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['../all_cha/15_14_sparse_code.cha']
+    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
+    #files = ['../all_cha/15_14_sparse_code.cha']
     file_with_error = []
-    listen_time_summary = []
+    outside_annotations_f = open('../output/outside_annots.txt', 'w')
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
         sequence, cf = pull_regions(file)
@@ -228,19 +178,17 @@ if __name__ == "__main__":
             print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
             file_with_error.append((os.path.basename(file), error_list))
         else:
-            listen_time = total_listen_time(cf, region_map)
-            listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
+            outside_annots = outside_annotation_check(cf, region_map)
+            if outside_annots and int(os.path.basename(file)[3:5])>=8:
+                outside_annotations_f.write(os.path.basename(file)+'\n')
+                for annot in outside_annots:
+                    outside_annotations_f.write('\t\t\t\t' + annot.__repr__() + '\t\t' + str(annot.offset)+'\n')
+                outside_annotations_f.write('\n')
+            print("Finished {}".format(os.path.basename(file)))
+    outside_annotations_f.close()
     with open('../output/summary.txt', 'w') as f:
         for entry in file_with_error:
             f.write(entry[0]+'\n')
             for error in entry[1]:
                 f.write('\t\t\t\t'+error+'\n')
-            f.write('\n')
-    with open('../output/listen_time_summary.csv', 'w') as f:
-        for entry in listen_time_summary:
-            f.write(entry[0]+',')
-            f.write(','.join([str(x) for x in entry[1]]))
-            f.write(',')
-            f.write(str(entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4]))
             f.write('\n')
