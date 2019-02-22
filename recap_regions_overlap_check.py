@@ -84,24 +84,50 @@ def sequence_missing_repetition_entry_alert(sequence):
     for entry in sequence:
         region_map[entry[0].split()[0]][entry[0].split()[1]].append(entry[1])
     for item in keyword_list:
-        if len(set(region_map[item]['starts'])) < len(set(region_map[item]['ends'])):
-            error_list.append(item + ' starts missing')
-        elif len(set(region_map[item]['starts'])) > len(set(region_map[item]['ends'])):
-            error_list.append(item + ' ends missing')
+        # if len(set(region_map[item]['starts'])) < len(set(region_map[item]['ends'])):
+        #     error_list.append(item + ' starts missing')
+        # elif len(set(region_map[item]['starts'])) > len(set(region_map[item]['ends'])):
+        #     error_list.append(item + ' ends missing')
         if len(set(region_map[item]['ends'])) < len(region_map[item]['ends']):
             error_list.append(item + ' ends repetition')
         if len(set(region_map[item]['starts'])) < len(region_map[item]['starts']):
             error_list.append(item + ' starts repetition')
+        start_list = sorted(set(region_map[item]['starts']))
+        end_list = sorted(set(region_map[item]['ends']))
+        if len(start_list)==len(end_list):
+            continue
+        i, j = 0, 0
+        while i<len(start_list) and j<len(end_list):
+            if start_list[i]<=end_list[j]:
+                i += 1
+                j += 1
+                continue
+            if start_list[i]>end_list[j]: # reversal, indicating that there is a missing start
+                error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
+                j += 1
+                continue
+            if i+1 < len(start_list) and start_list[i+1]<end_list[j]:
+                error_list.append(item + ' ends missing for start at ' + str(start_list[i]))
+                i += 1
+                continue
+        if i<len(start_list):
+            error_list.append(item + ' ends missing for start at ' + str(start_list[i]))
+        if j<len(end_list):
+            error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
     return error_list
 
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
     files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    #files = ['../all_cha/03_12_sparse_code.cha']
+    #files = ['../all_cha/07_07_sparse_code.cha']
     file_with_error = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
-        sequence = pull_regions(file)
+        try:
+            sequence = pull_regions(file)
+        except:
+            print(bcolors.FAIL + "Error opening file: {}".format(file) + bcolors.ENDC)
+            continue
         sequence_minimal_error_sorting(sequence)
         error_list = sequence_missing_repetition_entry_alert(sequence)
         with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
