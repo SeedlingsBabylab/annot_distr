@@ -15,6 +15,15 @@ This script outputs a bunch of txt files that are exactly the same as those prod
 ```
 python recap_regions_listen_time_compute.py path/to/cha/directory
 ```
+There are a few points to note for the processing logic:  
+* each remark (i.e. subregion, skip, makeup, etc) is given a rank relative to others, so that when sorted, we make sure that they are correctly bracketed within one another
+* there are a few preprocessing steps before the extraction of total time, and the order in which those steps are preformed cannot be arbitrarily altered
+
+Specifically, the preprocessing steps are:
+1. Remove any region that is nested in a skip region, so that we don't tally listen for those regions
+2. Remove silence regions that is outside any subregion
+3. Remove subregion with nested makeup. When a subregion has makeup region resides within, there should not be any annotations inside the subregion that is outside the makeup region. There will be a separate script to check for outliers
+
 
 ### recap_regions_outside_annotations_check.py
 This script outputs a bunch of txt files that are exactly the same as those produced by the previous scripts, and in addition produces a txt that contains a list of cha files that has annotations outside the expected regions (except those before month 8). 
