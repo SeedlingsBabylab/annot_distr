@@ -4,6 +4,7 @@ import re
 import sys
 import os.path
 import pandas as pd
+from multiprocessing import Pool, Manager
 
 class bcolors:
     HEADER = '\033[95m'
@@ -20,6 +21,10 @@ subr_regx = re.compile(r'subregion (\d*) ?of (\d*)') # There are some cases wher
 code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
 keyword_rank = {"subregion": 1, "skip": 2, "silence": 3, "makeup": 4, "extra": 5}
+
+manager = Manager()
+file_with_error = manager.list()
+listen_time_summary = manager.list()
 
 def pull_regions(path):
     cf = pc.ClanFile(path)
@@ -207,30 +212,35 @@ def total_listen_time(cf, region_map):
 
     return subregion_time, makeup_time, extra_time, silence_time, skip_time
 
+def process_single_file(file):
+    print("Checking {}".format(os.path.basename(file)))
+    try:
+        sequence, cf = pull_regions(file)
+    except:
+        print(bcolors.FAIL + "Error opening file: {}".format(file) + bcolors.ENDC)
+        return
+    sequence_minimal_error_sorting(sequence)
+    error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
+    with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
+        f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
+        f.write('\n')
+        f.write('\n')
+        f.write('\n')
+        f.write('\n'.join(error_list))
+    if error_list:
+        print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
+        file_with_error.append((os.path.basename(file), error_list))
+    else:
+        listen_time = total_listen_time(cf, region_map)
+        listen_time_summary.append((os.path.basename(file), listen_time))
+        print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
+
 if __name__ == "__main__":
     cha_dir = sys.argv[1]
-    #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['../all_cha/15_14_sparse_code.cha']
-    file_with_error = []
-    listen_time_summary = []
-    for file in files:
-        print("Checking {}".format(os.path.basename(file)))
-        sequence, cf = pull_regions(file)
-        sequence_minimal_error_sorting(sequence)
-        error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
-        with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
-            f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
-            f.write('\n')
-            f.write('\n')
-            f.write('\n')
-            f.write('\n'.join(error_list))
-        if error_list:
-            print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
-            file_with_error.append((os.path.basename(file), error_list))
-        else:
-            listen_time = total_listen_time(cf, region_map)
-            listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
+    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
+    #files = ['../all_cha/15_14_sparse_code.cha']
+    p = Pool(6)
+    p.map(process_single_file, files)
     with open('../output/summary.txt', 'w') as f:
         for entry in file_with_error:
             f.write(entry[0]+'\n')
@@ -238,10 +248,12 @@ if __name__ == "__main__":
                 f.write('\t\t\t\t'+error+'\n')
             f.write('\n')
     with open('../output/listen_time_summary.csv', 'w') as f:
-        f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms\n')
+        f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms,Total Listen Time/ms,Total Listen Time/hour\n')
         for entry in listen_time_summary:
             f.write(entry[0]+',')
             f.write(','.join([str(x) for x in entry[1]]))
             f.write(',')
             f.write(str(entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4]))
+            f.write(',')
+            f.write(str((entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4])/3600000.0))
             f.write('\n')
