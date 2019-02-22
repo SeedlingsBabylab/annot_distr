@@ -238,6 +238,7 @@ if __name__ == "__main__":
                 f.write('\t\t\t\t'+error+'\n')
             f.write('\n')
     with open('../output/listen_time_summary.csv', 'w') as f:
+        f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms\n')
         for entry in listen_time_summary:
             f.write(entry[0]+',')
             f.write(','.join([str(x) for x in entry[1]]))
