@@ -236,8 +236,18 @@ def process_single_file(file):
         print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
 
 if __name__ == "__main__":
-    cha_dir = sys.argv[1]
-    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
+    path_file = sys.argv[1]
+    files = []
+    with open(path_file) as f:
+        for folder in f.readlines():
+            folder = folder.strip()
+            try:
+                files.extend([os.path.join(folder, x) for x in os.listdir(folder) if x.endswith(".cha")])
+            except:
+                pass
+    print("Found {} cha files".format(len(files)))
+    #cha_dir = sys.argv[1]
+    #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
     #files = ['../all_cha/15_14_sparse_code.cha']
     p = Pool(6)
     p.map(process_single_file, files)

@@ -117,9 +117,18 @@ def sequence_missing_repetition_entry_alert(sequence):
     return error_list
 
 if __name__ == "__main__":
-    cha_dir = sys.argv[1]
-    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    #files = ['../all_cha/07_07_sparse_code.cha']
+    path_file = sys.argv[1]
+    files = []
+    with open(path_file) as f:
+        for folder in f.readlines():
+            folder = folder.strip()
+            try:
+                files.extend([os.path.join(folder, x) for x in os.listdir(folder) if x.endswith(".cha")])
+            except:
+                pass
+    print("Found {} cha files".format(len(files)))
+    #cha_dir = sys.argv[1]
+    #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
     file_with_error = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
