@@ -22,10 +22,6 @@ code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
 keyword_rank = {"subregion": 1, "skip": 2, "silence": 3, "makeup": 4, "extra": 5}
 
-manager = Manager()
-file_with_error = manager.list()
-listen_time_summary = manager.list()
-
 def pull_regions(path):
     cf = pc.ClanFile(path)
 
@@ -99,7 +95,8 @@ def sequence_missing_repetition_entry_alert(sequence):
             error_list.append(item + ' starts repetition')
     return error_list, region_map
 
-def total_listen_time(cf, region_map):
+def total_listen_time(cf, region_map, month67=False):
+    # Will output incorrect results when the overlaps are too complex
     def remove_regions_nested_in_skip():
         skip_start_times = region_map['skip']['starts']
         skip_end_times = region_map['skip']['ends']
@@ -114,6 +111,10 @@ def total_listen_time(cf, region_map):
                         #print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
                         del region_end_times[j]
                         del region_start_times[j]
+                    elif skip_start_times[i]<=region_start_times[j] and skip_end_times[i]<=region_end_times[j] and skip_end_times[i] >= region_start_times[j]:
+                        skip_start_times[i] = region_start_times[j]
+                    elif skip_start_times[i]>=region_start_times[j] and skip_end_times[i]>=region_end_times[j] and skip_start_times[i] <= region_end_times[j]:
+                        skip_end_times[i] = region_end_times[j]
 
     def remove_silence_regions_outside_subregions():
         silence_start_times = region_map['silence']['starts']
@@ -151,19 +152,36 @@ def total_listen_time(cf, region_map):
             if remove:
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+    
+    # Only used for month 6 and 7
+    def skip_silence_overlap_time():
+        skip_start_times = region_map['skip']['starts']
+        skip_end_times = region_map['skip']['ends']
+        silence_start_times = region_map['silence']['starts']
+        silence_end_times = region_map['silence']['ends']
+        overlap_time = 0
+        for i in range(len(skip_start_times)):
+            for j in range(len(silence_start_times)):
+                if skip_start_times[i]>=silence_start_times[j] and skip_start_times[i]<=silence_end_times[j]:
+                    overlap_time += min(silence_end_times[j], skip_end_times[i]) - skip_start_times[i]
+                elif skip_end_times[i]>=silence_start_times[j] and skip_end_times[i]<=silence_end_times[j]:
+                    overlap_time += max(silence_start_times[j], skip_start_times[i]) - skip_end_times[i]
+        return overlap_time
 
     def annotated_subregion_time():
         start_times = region_map['subregion']['starts']
         end_times = region_map['subregion']['ends']
         total_time = 0
+        num_subregion_with_annot = 0
         for i in range(len(start_times)):
             lines = cf.get_within_time(begin=start_times[i], end=end_times[i]).line_map
             for line in lines:
                 annot = code_regx.findall(line.line)
                 if annot:
+                    num_subregion_with_annot += 1
                     total_time += end_times[i] - start_times[i] # +1?
                     break
-        return total_time
+        return total_time, num_subregion_with_annot
     
     # I have those functions all separated in case we need to make modifications to the way we compute listen time for each region
     def skip_region_time():
@@ -188,7 +206,7 @@ def total_listen_time(cf, region_map):
         total_time = 0
         for i in range(len(start_times)):
             total_time += end_times[i] - start_times[i]
-        return total_time
+        return total_time, len(start_times)
 
     def makeup_region_time():
         start_times = region_map['makeup']['starts']
@@ -196,21 +214,59 @@ def total_listen_time(cf, region_map):
         total_time = 0
         for i in range(len(start_times)):
             total_time += end_times[i] - start_times[i]
-        return total_time
+        return total_time, len(start_times)
 
+    result = {}
+    if not month67:
+        # Preprocessing
+        remove_regions_nested_in_skip()
+        remove_silence_regions_outside_subregions()
+        remove_subregions_with_nested_makeup()
 
-    # Preprocessing
-    remove_regions_nested_in_skip()
-    remove_silence_regions_outside_subregions()
-    remove_subregions_with_nested_makeup()
+        subregion_time, num_subregion_with_annot = annotated_subregion_time()
+        result['subregion_time'] = subregion_time
+        result['num_subregion_with_annot'] = num_subregion_with_annot
 
-    subregion_time = annotated_subregion_time()
-    skip_time = skip_region_time()
-    silence_time = silence_region_time()
-    extra_time = extra_region_time()
-    makeup_time = makeup_region_time()
+        skip_time = skip_region_time()
+        result['skip_time'] = skip_region_time()
 
-    return subregion_time, makeup_time, extra_time, silence_time, skip_time
+        silence_time = silence_region_time()
+        result['silence_time'] = silence_time
+
+        extra_time, num_extra_region = extra_region_time()
+        result['extra_time'] = extra_time
+        result['num_extra_region'] = num_extra_region
+        
+        makeup_time, num_makeup_region = makeup_region_time()
+        result['makeup_time'] = makeup_time
+        result['num_makeup_region'] = num_makeup_region
+
+        result['total_listen_time'] = subregion_time + extra_time + makeup_time - silence_time - skip_time
+        result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
+
+        return result
+    else:
+        # Preprocessing
+        skip_silence_time = skip_silence_overlap_time()
+        skip_time = skip_region_time()
+        silence_time = silence_region_time()
+        total_time = cf.line_map[-1].offset
+        result['subregion_time'] = 0
+        result['num_subregion_with_annot'] = 0
+        result['skip_time'] = skip_time - skip_silence_time
+        result['silence_time'] = silence_time
+        result['extra_time'] = 0
+        result['num_extra_region'] = 0
+        result['makeup_time'] = 0
+        result['num_makeup_region'] = 0
+        result['total_listen_time'] = total_time - silence_time
+        result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
+        
+        return result
+
+manager = Manager()
+file_with_error = manager.list()
+listen_time_summary = manager.list()
 
 def process_single_file(file):
     print("Checking {}".format(os.path.basename(file)))
@@ -221,7 +277,7 @@ def process_single_file(file):
         return
     sequence_minimal_error_sorting(sequence)
     error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
-    with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
+    with open(os.path.join(cha_structure_path, os.path.basename(file)+'.txt'), 'w') as f:
         f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
         f.write('\n')
         f.write('\n')
@@ -231,39 +287,51 @@ def process_single_file(file):
         print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
         file_with_error.append((os.path.basename(file), error_list))
     else:
-        listen_time = total_listen_time(cf, region_map)
-        listen_time_summary.append((os.path.basename(file), listen_time))
-        print("Finished {}".format(os.path.basename(file)) + bcolors.OKGREEN + str(listen_time[0]+listen_time[1]+listen_time[2]-listen_time[3]-listen_time[4])+bcolors.ENDC)
+        if os.path.basename(file)[3:5] in ['06', '07']:
+            listen_time = total_listen_time(cf, region_map, month67=True)
+            listen_time_summary.append((os.path.basename(file), listen_time))
+            print("Finished {}".format(os.path.basename(file)) + 'Total Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+        else:
+            listen_time = total_listen_time(cf, region_map)
+            listen_time_summary.append((os.path.basename(file), listen_time))
+            print("Finished {}".format(os.path.basename(file)) + 'Total Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
 
 if __name__ == "__main__":
     path_file = sys.argv[1]
     files = []
     with open(path_file) as f:
-        for folder in f.readlines():
-            folder = folder.strip()
-            try:
-                files.extend([os.path.join(folder, x) for x in os.listdir(folder) if x.endswith(".cha")])
-            except:
-                pass
-    print("Found {} cha files".format(len(files)))
+        for path in f.readlines():
+            path = path.strip()
+            files.append(path)
+    print("Expected to process {} cha files".format(len(files)))    
+    # Create output folder if it does not exist
+    try:
+        output_path = sys.argv[2]
+    except:
+        output_path = 'output'
+    if not os.path.isdir(output_path):
+        os.mkdir(output_path)
+    if not os.path.isdir(os.path.join(output_path, 'cha structures')):
+        os.mkdir(os.path.join(output_path, 'cha structures'))
+    cha_structure_path = os.path.join(output_path, 'cha structures')
+
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    #files = ['../all_cha/15_14_sparse_code.cha']
+    #files = ['../all_cha/01_07_sparse_code.cha']
     p = Pool(6)
     p.map(process_single_file, files)
-    with open('../output/summary.txt', 'w') as f:
+    with open(os.path.join(output_path, 'Error Summary.txt'), 'w') as f:
         for entry in file_with_error:
             f.write(entry[0]+'\n')
             for error in entry[1]:
                 f.write('\t\t\t\t'+error+'\n')
             f.write('\n')
-    with open('../output/listen_time_summary.csv', 'w') as f:
-        f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms,Total Listen Time/ms,Total Listen Time/hour\n')
+    with open(os.path.join(output_path, 'Total Listen Time Summary.csv'), 'w') as f:
+        f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Total Listen Time/ms,Total Listen Time/hour\n')
+        listen_time_summary = list(listen_time_summary)
+        listen_time_summary.sort(key = lambda k: k[0])
         for entry in listen_time_summary:
             f.write(entry[0]+',')
-            f.write(','.join([str(x) for x in entry[1]]))
-            f.write(',')
-            f.write(str(entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4]))
-            f.write(',')
-            f.write(str((entry[1][0]+entry[1][1]+entry[1][2]-entry[1][3]-entry[1][4])/3600000.0))
-            f.write('\n')
+            f.write('{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
+            f.write('{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region'])))
+            f.write('{},{}\n'.format(str(entry[1]['total_listen_time']), str(entry[1]['total_listen_time_hour'])))
