@@ -318,6 +318,8 @@ if __name__ == "__main__":
     # Create output folder if it does not exist
     try:
         output_path = sys.argv[2]
+        if output_path.startswith('--'):
+            output_path = 'output'
     except:
         output_path = 'output'
     if not os.path.isdir(output_path):
@@ -332,7 +334,7 @@ if __name__ == "__main__":
 
     files = files[:10]
     
-    if '-fast' in sys.argv:
+    if '--fast' in sys.argv:
         multithread = True
     else:
         multithread = False
