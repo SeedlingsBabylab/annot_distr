@@ -25,10 +25,12 @@ The processing steps:
 ### recap_regions_listen_time_compute.py
 This script outputs a bunch of txt files that are exactly the same as those produced by the previous script, and in addition produces a csv file that summaries the total listen time for **each cha file that is error free** (it will skip those with errors).
 ```
-python recap_regions_listen_time_compute.py file_containing_paths_to_cha_files [path_to_output_folder]
+python recap_regions_listen_time_compute.py file_containing_paths_to_cha_files [path_to_output_folder] [-fast]
 ```
 
 The last parameter is output path and it is optional. By default, the output path will be the current folder/output. If the folder does not exist, it will be created automatically.  
+
+If the **-fast** option is used, the script will attempt to process multiple files concurrently. It may or may not work depending on the computer setup. Recommended procedure is to add the **-fast** option at the end since it speeds up the computation 6 folds. If the scripts throw an error, the fall back to running without **-fast**
 
 The processing steps:  
 1. The script goes through the whole cha file to look for the following types of remarks:  
@@ -45,7 +47,6 @@ The processing steps:
     (If Not Month 6 or Month 7)  
     * Remove all the regions that is completely enclosed in a skip region. (ie. if there is a subregion that is completely inside a skip region, it will be removed and its listen tiime is not computed)
     * If a skip region partially overlaps with any region, only the overlapping part of the skip region is taken into account (this is done by adjusting the start or end time of the skip region). (ie. if the first half of a subregion overlaps with a skip region, then the non-overlapping part of the skip region is discounted)
-    * If a 
 
 There are a few points to note for the processing logic:  
 * each remark (i.e. subregion, skip, makeup, etc) is given a rank relative to others, so when sorted, we make sure that they are correctly bracketed within one another

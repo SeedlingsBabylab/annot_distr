@@ -301,11 +301,11 @@ def process_single_file(file):
         if os.path.basename(file)[3:5] in ['06', '07']:
             listen_time = total_listen_time(cf, region_map, month67=True)
             listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + 'Total Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+            print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
         else:
             listen_time = total_listen_time(cf, region_map)
             listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + 'Total Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+            print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
 
 if __name__ == "__main__":
     path_file = sys.argv[1]
@@ -329,18 +329,20 @@ if __name__ == "__main__":
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
     #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/16/16_09/Home_Visit/Coding/Audio_Annotation/16_09_sparse_code.cha']
+
+    files = files[:10]
     
     if '-fast' in sys.argv:
         multithread = True
     else:
         multithread = False
 
+    global file_with_error
+    global listen_time_summary
     if multithread:
         global manager
         manager = Manager()
-        global file_with_error
         file_with_error = manager.list()
-        global listen_time_summary
         listen_time_summary = manager.list()
         p = Pool(6)
         p.map(process_single_file, files)
@@ -360,9 +362,7 @@ if __name__ == "__main__":
                 f.write('{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region'])))
                 f.write('{},{}\n'.format(str(entry[1]['total_listen_time']), str(entry[1]['total_listen_time_hour'])))
     else:
-        global file_with_error
         file_with_error = []
-        global listen_time_summary
         listen_time_summary = []
 
         for file in files:
