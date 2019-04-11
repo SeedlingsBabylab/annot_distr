@@ -129,22 +129,30 @@ def total_listen_time(cf, region_map, month67=False):
         silence_end_times = region_map['silence']['ends']
         subregion_start_times = region_map['subregion']['starts']
         subregion_end_times = region_map['subregion']['ends']
-        for i in range(len(silence_start_times)-1, -1, -1):
+        i = len(silence_start_times) - 1
+        while i>=0:
             remove = True
             for j in range(len(subregion_start_times)):
                 if silence_start_times[i]>=subregion_start_times[j] and silence_start_times[i]<=subregion_end_times[j]:
-                    print(silence_start_times[i])
-                    silence_end_times[i] = min(subregion_end_times[j], silence_end_times[i])
-                    print(silence_end_times[i])
+                    if silence_end_times[i]>subregion_end_times[j]:
+                        silence_end_times.append(silence_end_times[i])
+                        silence_start_times.append(subregion_end_times[j]+1)
+                        silence_end_times[i] = min(subregion_end_times[j], silence_end_times[i])
+                        i += 2
+                        silence_start_times.sort()
+                        silence_end_times.sort()
+                    else:
+                        silence_end_times[i] = min(subregion_end_times[j], silence_end_times[i])
                     remove = False
+                    break
                 if silence_end_times[i]>=subregion_start_times[j] and silence_end_times[i]<=subregion_end_times[j]:
                     silence_start_times[i] = max(subregion_start_times[j], silence_start_times[i])
                     remove = False
-                if not remove:
                     break
             if remove:
                 del silence_start_times[i]
                 del silence_end_times[i]
+            i -= 1
 
     '''
         TODO:
@@ -235,8 +243,8 @@ def total_listen_time(cf, region_map, month67=False):
     if not month67:
         # Preprocessing
         remove_regions_nested_in_skip()
-        remove_silence_regions_outside_subregions()
         remove_subregions_with_nested_makeup()
+        remove_silence_regions_outside_subregions()
 
         subregion_time, num_subregion_with_annot = annotated_subregion_time()
         result['subregion_time'] = subregion_time
@@ -330,9 +338,8 @@ if __name__ == "__main__":
 
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/16/16_09/Home_Visit/Coding/Audio_Annotation/16_09_sparse_code.cha']
-
-    files = files[:10]
+    #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/13/13_16/Home_Visit/Coding/Audio_Annotation/13_16_sparse_code.cha']
+    #files = files[:10]
     
     if '--fast' in sys.argv:
         multithread = True
