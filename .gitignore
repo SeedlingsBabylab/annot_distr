@@ -8,3 +8,4 @@ test
 problemfile_comments
 output
 .vscode
+.DS_Store
