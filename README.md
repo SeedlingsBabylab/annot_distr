@@ -42,21 +42,27 @@ The processing steps:
 
     as well as the timestamp associated with all of the above remarks. 
 2. The script sort the remarks according to their timestamps and assigned ranks (explained below) in case that two remarks have the same timestamp.
-3. The script builds two lists for each type of remark, one for the list of starting times and one for the list of ending times. It then goes through the lists to check whether the length of the two lists match (if not, either region start or region end remarks are missing). It is noted as error, and the script will notify the error and stop further processing this script.
+3. The script builds two lists for each type of remark, one for the list of starting times and one for the list of ending times. It then goes through the lists to check whether the length of the two lists match (if not, either region start or region end remarks are missing). It is noted as an error, and the script will notify the error and stop further processing of this file.
 4. If no error is found, the script will start computing the total listen time. For month 6 and 7 cha files, the processing steps are different. The more detailed steps are found here (note that all operations are done on the lists created earlier and the original cha files are not modified at all):  
     (If Not Month 6 or Month 7)  
     * Remove all the regions that is completely enclosed in a skip region. (ie. if there is a subregion that is completely inside a skip region, it will be removed and its listen tiime is not computed)
     * If a skip region partially overlaps with any region, only the overlapping part of the skip region is taken into account (this is done by adjusting the start or end time of the skip region). (ie. if the first half of a subregion overlaps with a skip region, then the non-overlapping part of the skip region is discounted)
-
+    * Remove all the subregions that contains a makeup region. It is assumed that the listen time of those subregions that contain a makeup region should not be computed
+    * Remove silence regions or parts of a silence region that is not in overlap with a subregion
+    * Compute total time of various segments and perform proper computations to get the overall listened time
+    (If Month 6 or Month 7)
+    * Discount the overlap between a silence region and a skip region
+    * Compute total listen time by subtracting the skip and silence region time from the length of the whole file
+    
 There are a few points to note for the processing logic:  
 * each remark (i.e. subregion, skip, makeup, etc) is given a rank relative to others, so when sorted, we make sure that they are correctly bracketed within one another
 * there are a few preprocessing steps before the extraction of total time, and the order in which those steps are preformed cannot be arbitrarily altered
 
-Specifically, the preprocessing steps are:
-1. Remove any region that is nested in a skip region, so that we don't tally listen for those regions
-2. Remove silence regions that is outside any subregion
-3. Remove subregion with nested makeup. When a subregion has makeup region resides within, there should not be any annotations inside the subregion that is outside the makeup region. There will be a separate script to check for outliers
+Currently, the script is able to deal with the following kinds of overlaps:  
+1. [&nbsp;&nbsp;{&nbsp;]&nbsp;&nbsp;}
+2. [&nbsp;&nbsp;{&nbsp;]&nbsp;[&nbsp;}&nbsp;&nbsp;]
 
+Where [] and {} refers to the interval of two different kinds of regions.
 
 ### recap_regions_outside_annotations_check.py
 This script outputs a bunch of txt files that are exactly the same as those produced by the previous scripts, and in addition produces a txt that contains a list of cha files that has annotations outside the expected regions (except those before month 8). 
