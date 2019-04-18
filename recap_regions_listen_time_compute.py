@@ -161,6 +161,22 @@ def total_listen_time(cf, region_map, month67=False):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
         #print(subregion_start_times)
+    
+    def remove_subregions_nested_in_silence_regions():    
+        silence_start_times = region_map['silence']['starts']
+        silence_end_times = region_map['silence']['ends']
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        for i in range(len(subregion_start_times)-1, -1, -1):
+            remove = False
+            for j in range(len(silence_start_times)):
+                if subregion_start_times[i]>=silence_start_times[j] and subregion_end_times[i]<=silence_end_times[j]:
+                    remove = True
+                    break
+            if remove:
+                del subregion_start_times[i]
+                del subregion_end_times[i]
+        #print(subregion_start_times)
 
     def remove_silence_regions_outside_subregions():
         silence_start_times = region_map['silence']['starts']
@@ -256,6 +272,7 @@ def total_listen_time(cf, region_map, month67=False):
         remove_regions_nested_in_skip()
         remove_subregions_with_nested_makeup()
         remove_subregions_without_annotations()
+        remove_subregions_nested_in_silence_regions()
         remove_silence_regions_outside_subregions()
 
         subregion_time, num_subregion_with_annot = annotated_subregion_time()
@@ -306,7 +323,7 @@ def process_single_file(file):
     except:
         print(bcolors.FAIL + "Error opening file: {}".format(file) + bcolors.ENDC)
         return
-    sequence_minimal_error_sorting(sequence)
+    sequence = sequence_minimal_error_sorting(sequence)
     error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
     with open(os.path.join(cha_structure_path, os.path.basename(file)+'.txt'), 'w') as f:
         f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
@@ -350,7 +367,7 @@ if __name__ == "__main__":
 
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    files = ['/Volumes/pn-opus/Seedlings/Subject_Files/16/16_08/Home_Visit/Coding/Audio_Annotation/16_08_sparse_code.cha']
+    #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/34/34_13/Home_Visit/Coding/Audio_Annotation/34_13_sparse_code.cha']
     #files = files[:10]
     
     if '--fast' in sys.argv:
