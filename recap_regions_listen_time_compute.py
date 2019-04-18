@@ -123,6 +123,44 @@ def total_listen_time(cf, region_map, month67=False):
                         skip_start_times[i] = region_start_times[j]
                     elif skip_start_times[i]>=region_start_times[j] and skip_end_times[i]>=region_end_times[j] and skip_start_times[i] <= region_end_times[j]:
                         skip_end_times[i] = region_end_times[j]
+    '''
+        TODO:
+        Assumption: if a subregion has nested makeup region, that means there should not be any other annotations outside the nested makeup region
+                    but inside the subregion (i.e. the subregion could be discounted)
+
+        This assumption needs to be verified
+    '''
+    def remove_subregions_with_nested_makeup():
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        makeup_start_times = region_map['makeup']['starts']
+        makeup_end_times = region_map['makeup']['ends']
+        for i in range(len(subregion_start_times)-1, -1, -1):
+            remove = False
+            for j in range(len(makeup_start_times)):
+                if subregion_start_times[i]<=makeup_start_times[j] and subregion_end_times[i]>=makeup_end_times[j]:
+                    remove = True
+                    break
+            if remove:
+                del subregion_start_times[i]
+                del subregion_end_times[i]
+        #print(subregion_start_times)
+
+    def remove_subregions_without_annotations():
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        for i in range(len(subregion_start_times)-1, -1, -1):
+            remove = True
+            lines = cf.get_within_time(begin=subregion_start_times[i], end=subregion_end_times[i]).line_map
+            for line in lines:
+                annot = code_regx.findall(line.line)
+                if annot:
+                    remove = False
+                    break
+            if remove:
+                del subregion_start_times[i]
+                del subregion_end_times[i]
+        #print(subregion_start_times)
 
     def remove_silence_regions_outside_subregions():
         silence_start_times = region_map['silence']['starts']
@@ -154,28 +192,6 @@ def total_listen_time(cf, region_map, month67=False):
                 del silence_end_times[i]
             i -= 1
 
-    '''
-        TODO:
-        Assumption: if a subregion has nested makeup region, that means there should not be any other annotations outside the nested makeup region
-                    but inside the subregion (i.e. the subregion could be discounted)
-
-        This assumption needs to be verified
-    '''
-    def remove_subregions_with_nested_makeup():
-        subregion_start_times = region_map['subregion']['starts']
-        subregion_end_times = region_map['subregion']['ends']
-        makeup_start_times = region_map['makeup']['starts']
-        makeup_end_times = region_map['makeup']['ends']
-        for i in range(len(subregion_start_times)-1, -1, -1):
-            remove = False
-            for j in range(len(makeup_start_times)):
-                if subregion_start_times[i]<=makeup_start_times[j] and subregion_end_times[i]>=makeup_end_times[j]:
-                    remove = True
-                    break
-            if remove:
-                del subregion_start_times[i]
-                del subregion_end_times[i]
-    
     # Only used for month 6 and 7
     def skip_silence_overlap_time():
         skip_start_times = region_map['skip']['starts']
@@ -197,13 +213,8 @@ def total_listen_time(cf, region_map, month67=False):
         total_time = 0
         num_subregion_with_annot = 0
         for i in range(len(start_times)):
-            lines = cf.get_within_time(begin=start_times[i], end=end_times[i]).line_map
-            for line in lines:
-                annot = code_regx.findall(line.line)
-                if annot:
-                    num_subregion_with_annot += 1
-                    total_time += end_times[i] - start_times[i] # +1?
-                    break
+            num_subregion_with_annot += 1
+            total_time += end_times[i] - start_times[i] # +1?
         return total_time, num_subregion_with_annot
     
     # I have those functions all separated in case we need to make modifications to the way we compute listen time for each region
@@ -244,6 +255,7 @@ def total_listen_time(cf, region_map, month67=False):
         # Preprocessing
         remove_regions_nested_in_skip()
         remove_subregions_with_nested_makeup()
+        remove_subregions_without_annotations()
         remove_silence_regions_outside_subregions()
 
         subregion_time, num_subregion_with_annot = annotated_subregion_time()
@@ -338,7 +350,7 @@ if __name__ == "__main__":
 
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
-    #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/13/13_16/Home_Visit/Coding/Audio_Annotation/13_16_sparse_code.cha']
+    files = ['/Volumes/pn-opus/Seedlings/Subject_Files/16/16_08/Home_Visit/Coding/Audio_Annotation/16_08_sparse_code.cha']
     #files = files[:10]
     
     if '--fast' in sys.argv:
