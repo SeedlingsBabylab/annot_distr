@@ -23,6 +23,14 @@ subr_time_regx = re.compile(r'at (\d+)')
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
 keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "subregion ends": 10, "silence ends": 9, "skip ends": 8, "makeup ends": 7, "extra ends": 6}
 
+
+# '''
+# Step 1:
+#     Parse file by pyclan and extract comments from the file. 
+#     Go through each comment, if it marks the beginning or ending of the regions,
+#     mark it down to a list of tuples that looks like:
+#     [(subregion starts, timestamp),  (silence starts, timestamp), (silence ends, timestamp)....]
+# '''
 def pull_regions(path):
     cf = pc.ClanFile(path)
 
@@ -67,10 +75,30 @@ def pull_regions(path):
         #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
     return sequence, cf
 
+
+# '''
+# Step 2:
+#     Sort the output, a list of tuples, from the pull_regions function. 
+#     The sorting has two keys, primary key is the timestamp, ascending
+#     secondary sorting key is rank specified in keyword rank. 
+#     The purpose of the secondary key is to ensure that when two entries
+#     have the same timestamp, certain sorting order is still maintained.
+# '''
 def sequence_minimal_error_sorting(sequence):
     sequence = sorted(sequence, key=lambda k: (k[1], keyword_rank[k[0]]))
     return sequence
 
+# '''
+# Step 3:
+#     Basic error checking. It first builds the following map:
+#     region_map = {
+#         'subregion': [[list 1], [list 2]],
+#         'silence': [[list 1], [list 2]],
+#         ....
+#     }
+#     where list 1 and list 2 are the starting and ending timestamps for that particular type of region.
+#     The checking makes sure that both the beginning and end remarks are present for each region identified.
+# '''
 def sequence_missing_repetition_entry_alert(sequence):
     region_map = {x:{'starts':[], 'ends': []} for x in keyword_list}
     error_list = []
@@ -103,8 +131,16 @@ def sequence_missing_repetition_entry_alert(sequence):
             error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
     return error_list, region_map
 
+# '''
+# Step 4:
+#     Compute the total listen time. Several transformations or filterings are done before computing the total listen time.
+# '''
 def total_listen_time(cf, region_map, month67=False):
-    # Will output incorrect results when the overlaps are too complex
+    # '''
+    # Subruotine 1:
+    #     Remove all the regions that are completely nested within the skip regions.
+    #     If a region is partially overlap with a skip region, remove only the overlapping portion by adjusting the boundary of the region.
+    # '''
     def remove_regions_nested_in_skip():
         skip_start_times = region_map['skip']['starts']
         skip_end_times = region_map['skip']['ends']
@@ -130,6 +166,11 @@ def total_listen_time(cf, region_map, month67=False):
 
         This assumption needs to be verified
     '''
+    # '''
+    # Subroutine 2:
+    #     Remove all the subregioins that has a makeup region inside. This is because only the makeup region listen time
+    #     needs to be summed.
+    # '''
     def remove_subregions_with_nested_makeup():
         subregion_start_times = region_map['subregion']['starts']
         subregion_end_times = region_map['subregion']['ends']
@@ -145,7 +186,12 @@ def total_listen_time(cf, region_map, month67=False):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
         #print(subregion_start_times)
-
+    
+    # '''
+    # Subroutine 3:
+    #     Remove all subregions that does not have any annotations. Those regions should be ignored since they do not consists
+    #     of any listened content.
+    # '''
     def remove_subregions_without_annotations():
         subregion_start_times = region_map['subregion']['starts']
         subregion_end_times = region_map['subregion']['ends']
@@ -162,6 +208,10 @@ def total_listen_time(cf, region_map, month67=False):
                 del subregion_end_times[i]
         #print(subregion_start_times)
     
+    # '''
+    # Subroutine 4:
+    #     Remove subregions that are completely nested in the silence regions.
+    # '''
     def remove_subregions_nested_in_silence_regions():    
         silence_start_times = region_map['silence']['starts']
         silence_end_times = region_map['silence']['ends']
@@ -178,6 +228,10 @@ def total_listen_time(cf, region_map, month67=False):
                 del subregion_end_times[i]
         #print(subregion_start_times)
 
+    # '''
+    # Subroutine 5:
+    #     Remove parts of the subregions that are overlapping with silence regions.
+    # '''
     def remove_silence_regions_outside_subregions():
         silence_start_times = region_map['silence']['starts']
         silence_end_times = region_map['silence']['ends']
@@ -208,6 +262,10 @@ def total_listen_time(cf, region_map, month67=False):
                 del silence_end_times[i]
             i -= 1
 
+    # '''
+    # This is only used for month 6 and 7.
+    # The total time where skip and silence regions overlap are computed so as to be subtracted from silence time computed later.
+    # '''
     # Only used for month 6 and 7
     def skip_silence_overlap_time():
         skip_start_times = region_map['skip']['starts']
