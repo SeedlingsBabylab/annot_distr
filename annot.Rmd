@@ -40,3 +40,17 @@ listened_time %>%
   facet_wrap( ~ month, scales = "free_x")
 
 ```
+
+
+
+which files to check for too much time
+
+```{r overage}
+
+eight_mo_over <- listened_time %>%
+  filter(month == 8) %>%
+  filter(total_listen_hr > 4.0)
+
+```
+
+
