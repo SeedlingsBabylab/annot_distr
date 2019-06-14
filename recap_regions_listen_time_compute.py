@@ -20,13 +20,13 @@ class bcolors:
 subr_regx = re.compile(r'subregion (\d*) ?of (\d*)') # There are some cases where the numbering is missing
 code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
 subr_time_regx = re.compile(r'at (\d+)')
-keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
-keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "subregion ends": 10, "silence ends": 9, "skip ends": 8, "makeup ends": 7, "extra ends": 6}
+keyword_list = ["subregion", "silence", "skip", "makeup", "extra", "surplus"]
+keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "surplus starts":6, "subregion ends": 12, "silence ends": 11, "skip ends": 10, "makeup ends": 8, "extra ends": 8, "surplus ends":7}
 
 
 # '''
 # Step 1:
-#     Parse file by pyclan and extract comments from the file. 
+#     Parse file by pyclan and extract comments from the file.
 #     Go through each comment, if it marks the beginning or ending of the regions,
 #     mark it down to a list of tuples that looks like:
 #     [(subregion starts, timestamp),  (silence starts, timestamp), (silence ends, timestamp)....]
@@ -71,6 +71,11 @@ def pull_regions(path):
                 sequence.append(('makeup starts', cline.offset))
             elif 'end' in line:
                 sequence.append(('makeup ends', cline.offset))
+        elif 'surplus' in line:
+            if 'begin' in line:
+                sequence.append(('surplus starts', cline.offset))
+            elif 'end' in line:
+                sequence.append(('surplus ends', cline.offset))
         # if len(sequence)>1 and sequence[-2][1]==cline.offset:
         #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
     return sequence, cf
@@ -78,9 +83,9 @@ def pull_regions(path):
 
 # '''
 # Step 2:
-#     Sort the output, a list of tuples, from the pull_regions function. 
+#     Sort the output, a list of tuples, from the pull_regions function.
 #     The sorting has two keys, primary key is the timestamp, ascending
-#     secondary sorting key is rank specified in keyword rank. 
+#     secondary sorting key is rank specified in keyword rank.
 #     The purpose of the secondary key is to ensure that when two entries
 #     have the same timestamp, certain sorting order is still maintained.
 # '''
@@ -152,7 +157,7 @@ def total_listen_time(cf, region_map, month67=False):
             for i in range(len(skip_start_times)):
                 for j in range(len(region_start_times)-1, -1, -1):
                     if skip_start_times[i]<=region_start_times[j] and skip_end_times[i]>=region_end_times[j]:
-                        #print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
+                        print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
                         del region_end_times[j]
                         del region_start_times[j]
                     elif skip_start_times[i]<=region_start_times[j] and skip_end_times[i]<=region_end_times[j] and skip_end_times[i] >= region_start_times[j]:
@@ -183,10 +188,11 @@ def total_listen_time(cf, region_map, month67=False):
                     remove = True
                     break
             if remove:
+                print("nested makeup",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
         #print(subregion_start_times)
-    
+
     # '''
     # Subroutine 3:
     #     Remove all subregions that does not have any annotations. Those regions should be ignored since they do not consists
@@ -204,15 +210,16 @@ def total_listen_time(cf, region_map, month67=False):
                     remove = False
                     break
             if remove:
+                print("no annot", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
         #print(subregion_start_times)
-    
+
     # '''
     # Subroutine 4:
     #     Remove subregions that are completely nested in the silence regions.
     # '''
-    def remove_subregions_nested_in_silence_regions():    
+    def remove_subregions_nested_in_silence_regions():
         silence_start_times = region_map['silence']['starts']
         silence_end_times = region_map['silence']['ends']
         subregion_start_times = region_map['subregion']['starts']
@@ -224,6 +231,7 @@ def total_listen_time(cf, region_map, month67=False):
                     remove = True
                     break
             if remove:
+                print("in silence", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
         #print(subregion_start_times)
@@ -290,7 +298,7 @@ def total_listen_time(cf, region_map, month67=False):
             num_subregion_with_annot += 1
             total_time += end_times[i] - start_times[i] # +1?
         return total_time, num_subregion_with_annot
-    
+
     # I have those functions all separated in case we need to make modifications to the way we compute listen time for each region
     def skip_region_time():
         start_times = region_map['skip']['starts']
@@ -324,6 +332,14 @@ def total_listen_time(cf, region_map, month67=False):
             total_time += end_times[i] - start_times[i]
         return total_time, len(start_times)
 
+    def surplus_region_time():
+        start_times = region_map['surplus']['starts']
+        end_times = region_map['surplus']['ends']
+        total_time = 0
+        for i in range(len(start_times)):
+            total_time += end_times[i] - start_times[i]
+        return total_time, len(start_times)
+
     result = {}
     if not month67:
         # Preprocessing
@@ -346,12 +362,16 @@ def total_listen_time(cf, region_map, month67=False):
         extra_time, num_extra_region = extra_region_time()
         result['extra_time'] = extra_time
         result['num_extra_region'] = num_extra_region
-        
+
         makeup_time, num_makeup_region = makeup_region_time()
         result['makeup_time'] = makeup_time
         result['num_makeup_region'] = num_makeup_region
 
-        result['total_listen_time'] = subregion_time + extra_time + makeup_time - silence_time - skip_time
+        surplus_time, num_surplus_region = surplus_region_time()
+        result['surplus_time'] = surplus_time
+        result['num_surplus_region'] = num_surplus_region
+
+        result['total_listen_time'] = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
         result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
 
         return result
@@ -366,12 +386,14 @@ def total_listen_time(cf, region_map, month67=False):
         result['skip_time'] = skip_time - skip_silence_time
         result['silence_time'] = silence_time
         result['extra_time'] = 0
+        result['surplus_time'] = 0
         result['num_extra_region'] = 0
         result['makeup_time'] = 0
         result['num_makeup_region'] = 0
+        result['num_surplus_region'] = 0
         result['total_listen_time'] = total_time - silence_time
         result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
-        
+
         return result
 
 def process_single_file(file):
@@ -409,7 +431,7 @@ if __name__ == "__main__":
         for path in f.readlines():
             path = path.strip()
             files.append(path)
-    print("Expected to process {} cha files".format(len(files)))    
+    print("Expected to process {} cha files".format(len(files)))
     # Create output folder if it does not exist
     try:
         output_path = sys.argv[2]
@@ -427,7 +449,7 @@ if __name__ == "__main__":
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
     #files = ['/Volumes/pn-opus/Seedlings/Subject_Files/34/34_13/Home_Visit/Coding/Audio_Annotation/34_13_sparse_code.cha']
     #files = files[:10]
-    
+
     if '--fast' in sys.argv:
         multithread = True
     else:
@@ -449,13 +471,13 @@ if __name__ == "__main__":
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
         with open(os.path.join(output_path, 'Total Listen Time Summary.csv'), 'w') as f:
-            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Total Listen Time/ms,Total Listen Time/hour\n')
+            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
             for entry in listen_time_summary:
                 f.write(entry[0]+',')
-                f.write('{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
-                f.write('{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region'])))
+                f.write('{},{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['surplus_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
+                f.write('{},{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region']), str(entry[1]['num_surplus_region'])))
                 f.write('{},{}\n'.format(str(entry[1]['total_listen_time']), str(entry[1]['total_listen_time_hour'])))
     else:
         file_with_error = []
@@ -463,7 +485,7 @@ if __name__ == "__main__":
 
         for file in files:
             process_single_file(file)
-    
+
         with open(os.path.join(output_path, 'Error Summary.txt'), 'w') as f:
             for entry in file_with_error:
                 f.write(entry[0]+'\n')
@@ -471,11 +493,11 @@ if __name__ == "__main__":
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
         with open(os.path.join(output_path, 'Total Listen Time Summary.csv'), 'w') as f:
-            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Total Listen Time/ms,Total Listen Time/hour\n')
+            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
             for entry in listen_time_summary:
                 f.write(entry[0]+',')
-                f.write('{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
-                f.write('{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region'])))
+                f.write('{},{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['surplus_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
+                f.write('{},{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region']), str(entry[1]['num_surplus_region'])))
                 f.write('{},{}\n'.format(str(entry[1]['total_listen_time']), str(entry[1]['total_listen_time_hour'])))
