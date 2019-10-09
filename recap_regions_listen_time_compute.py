@@ -116,6 +116,10 @@ def sequence_missing_repetition_entry_alert(sequence):
     for entry in sequence:
         region_map[entry[0].split()[0]][entry[0].split()[1]].append(entry[1])
     for item in keyword_list:
+        if len(region_map[item]['starts']) == 0:
+            continue
+        if len(region_map[item]['ends']) == 0:
+            continue
         # Checking for duplicate starts and ends. Length of set will be shorter if there are duplicates.
         if len(set(region_map[item]['ends'])) < len(region_map[item]['ends']):
             error_list.append(item + ' ends repetition')
@@ -124,19 +128,24 @@ def sequence_missing_repetition_entry_alert(sequence):
         start_list = sorted(set(region_map[item]['starts']))
         end_list = sorted(set(region_map[item]['ends']))
         i, j = 0, 0
+        pe = 0
+
         while i<len(start_list) and j<len(end_list):
+            if start_list[i] < pe:
+                print('Found a nesting! {0} end at {1} is nested between {0} start at {2} and {0} end at {3}'.format(item, pe, start_list[i], end_list[j]))
+                print(item, pe)
+                error_list.append('Found a nesting! {0} end at {1} is nested between {0} start at {2} and {0} end at {3}'.format(item, pe, start_list[i], end_list[j]))
+            pe = end_list[j]
             if start_list[i]<=end_list[j]:
                 i += 1
                 j += 1
-                continue
-            if start_list[i]>end_list[j]: # reversal, indicating that there is a missing start
+            else: # rstart_list[i]>end_list[j]: eversal, indicating that there is a missing start
                 error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
                 j += 1
-                continue
         if i<len(start_list):
             error_list.extend([item + 'ends missing for start at ' + str(start_list[s]) for s in start_list[i:]])
         if j<len(end_list):
-            error_list.extend([item + 'ends missing for start at ' + str(end_list[s]) for s in end_list[j:]])
+            error_list.extend([item + 'starts missing for end at ' + str(end_list[s]) for s in end_list[j:]])
     return error_list, region_map
 
 # '''
@@ -490,7 +499,7 @@ if __name__ == "__main__":
     else:
         multithread = False
 
-    global listen_time_summary
+    listen_time_summary
     if multithread:
         global manager
         manager = Manager()
