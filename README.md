@@ -27,6 +27,10 @@ This script outputs a bunch of txt files that are exactly the same as those prod
 ```
 python recap_regions_listen_time_compute.py file_containing_paths_to_cha_files [path_to_output_folder] [--fast]
 ```
+More specifically
+```
+python /Volumes/pn-opus/Seedlings/Scripts_and_Apps/Github/seedlings/annot_distr/recap_regions_listen_time_compute.py /Volumes/pn-opus/Seedlings/Scripts_and_Apps/Github/seedlings/path_files/cha_sparse_code_paths.txt
+```
 
 The last parameter is output path and it is optional. By default, the output path will be the current folder/output. If the folder does not exist, it will be created automatically.  
 
