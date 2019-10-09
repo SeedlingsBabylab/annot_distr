@@ -133,10 +133,6 @@ Step 3:
                 error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
                 j += 1
                 continue
-            if i+1 < len(start_list) and start_list[i+1]<end_list[j]:
-                error_list.append(item + ' ends missing for start at ' + str(start_list[i]))
-                i += 1
-                continue
         if i<len(start_list):
             error_list.append(item + ' ends missing for start at ' + str(start_list[i]))
         if j<len(end_list):
