@@ -10,6 +10,7 @@ import pdb
 
 file_with_error = []
 cha_structure_path = ""
+listen_time_summary = []
 
 class bcolors:
     HEADER = '\033[95m'
@@ -499,7 +500,6 @@ if __name__ == "__main__":
     else:
         multithread = False
 
-    listen_time_summary
     if multithread:
         global manager
         manager = Manager()
