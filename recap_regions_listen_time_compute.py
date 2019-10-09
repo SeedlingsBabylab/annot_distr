@@ -5,6 +5,11 @@ import sys
 import os.path
 import pandas as pd
 from multiprocessing import Pool, Manager
+import pdb
+
+
+file_with_error = []
+cha_structure_path = ""
 
 class bcolors:
     HEADER = '\033[95m'
@@ -93,23 +98,25 @@ def sequence_minimal_error_sorting(sequence):
     sequence = sorted(sequence, key=lambda k: (k[1], keyword_rank[k[0]]))
     return sequence
 
-# '''
-# Step 3:
-#     Basic error checking. It first builds the following map:
-#     region_map = {
-#         'subregion': [[list 1], [list 2]],
-#         'silence': [[list 1], [list 2]],
-#         ....
-#     }
-#     where list 1 and list 2 are the starting and ending timestamps for that particular type of region.
-#     The checking makes sure that both the beginning and end remarks are present for each region identified.
-# '''
 def sequence_missing_repetition_entry_alert(sequence):
+"""
+Step 3:
+    Basic error checking. It first builds the following map:
+    region_map = {
+        'subregion': {'starts': [list 1], 'ends': [list 2]},
+        'silence': {'starts': [list 1], 'ends': [list 2]},
+        ....
+    }
+    where list 1 and list 2 are the starting and ending timestamps for that particular type of region.
+    The checking makes sure that both the beginning and end remarks are present for each region identified.
+"""
+
     region_map = {x:{'starts':[], 'ends': []} for x in keyword_list}
     error_list = []
     for entry in sequence:
         region_map[entry[0].split()[0]][entry[0].split()[1]].append(entry[1])
     for item in keyword_list:
+        # Checking for duplicate starts and ends. Length of set will be shorter if there are duplicates.
         if len(set(region_map[item]['ends'])) < len(region_map[item]['ends']):
             error_list.append(item + ' ends repetition')
         if len(set(region_map[item]['starts'])) < len(region_map[item]['starts']):
@@ -427,7 +434,8 @@ def total_listen_time(cf, region_map, month67=False):
 
         return result
 
-def process_single_file(file):
+def process_single_file(file, file_path=cha_structure_path):
+
     print("Checking {}".format(os.path.basename(file)))
     try:
         sequence, cf = pull_regions(file)
@@ -436,7 +444,7 @@ def process_single_file(file):
         return
     sequence = sequence_minimal_error_sorting(sequence)
     error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
-    with open(os.path.join(cha_structure_path, os.path.basename(file)+'.txt'), 'w') as f:
+    with open(os.path.join(file_path, os.path.basename(file)+'.txt'), 'w') as f:
         f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
         f.write('\n')
         f.write('\n')
@@ -486,7 +494,6 @@ if __name__ == "__main__":
     else:
         multithread = False
 
-    global file_with_error
     global listen_time_summary
     if multithread:
         global manager
@@ -515,7 +522,7 @@ if __name__ == "__main__":
         listen_time_summary = []
 
         for file in files:
-            process_single_file(file)
+            process_single_file(file, cha_structure_path)
 
         with open(os.path.join(output_path, 'Error Summary.txt'), 'w') as f:
             for entry in file_with_error:
