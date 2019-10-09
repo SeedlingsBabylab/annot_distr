@@ -99,17 +99,17 @@ def sequence_minimal_error_sorting(sequence):
     return sequence
 
 def sequence_missing_repetition_entry_alert(sequence):
-"""
-Step 3:
-    Basic error checking. It first builds the following map:
-    region_map = {
-        'subregion': {'starts': [list 1], 'ends': [list 2]},
-        'silence': {'starts': [list 1], 'ends': [list 2]},
-        ....
-    }
-    where list 1 and list 2 are the starting and ending timestamps for that particular type of region.
-    The checking makes sure that both the beginning and end remarks are present for each region identified.
-"""
+    """
+    Step 3:
+        Basic error checking. It first builds the following map:
+        region_map = {
+            'subregion': {'starts': [list 1], 'ends': [list 2]},
+            'silence': {'starts': [list 1], 'ends': [list 2]},
+            ....
+        }
+        where list 1 and list 2 are the starting and ending timestamps for that particular type of region.
+        The checking makes sure that both the beginning and end remarks are present for each region identified.
+    """
 
     region_map = {x:{'starts':[], 'ends': []} for x in keyword_list}
     error_list = []
@@ -134,9 +134,9 @@ Step 3:
                 j += 1
                 continue
         if i<len(start_list):
-            error_list.append(item + ' ends missing for start at ' + str(start_list[i]))
+            error_list.extend([item + 'ends missing for start at ' + str(start_list[s]) for s in start_list[i:]])
         if j<len(end_list):
-            error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
+            error_list.extend([item + 'ends missing for start at ' + str(end_list[s]) for s in end_list[j:]])
     return error_list, region_map
 
 # '''
