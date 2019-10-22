@@ -459,15 +459,15 @@ def process_single_file(file, file_path=cha_structure_path):
     if error_list:
         print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
         file_with_error.append((os.path.basename(file), error_list))
+
+    if os.path.basename(file)[3:5] in ['06', '07']:
+        listen_time = total_listen_time(cf, region_map, month67=True)
+        listen_time_summary.append((os.path.basename(file), listen_time))
+        print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
     else:
-        if os.path.basename(file)[3:5] in ['06', '07']:
-            listen_time = total_listen_time(cf, region_map, month67=True)
-            listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
-        else:
-            listen_time = total_listen_time(cf, region_map)
-            listen_time_summary.append((os.path.basename(file), listen_time))
-            print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+        listen_time = total_listen_time(cf, region_map)
+        listen_time_summary.append((os.path.basename(file), listen_time))
+        print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
 
 if __name__ == "__main__":
     path_file = sys.argv[1]
