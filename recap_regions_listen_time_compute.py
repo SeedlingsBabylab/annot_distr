@@ -131,6 +131,7 @@ def sequence_missing_repetition_entry_alert(sequence):
         i, j = 0, 0
         pe = 0
 
+        # Added code to check for nesting of same type (skips within skips, fully or partially, which is not handled by default!)
         while i<len(start_list) and j<len(end_list):
             if start_list[i] < pe:
                 print('Found a nesting! {0} end at {1} is nested between {0} start at {2} and {0} end at {3}'.format(item, pe, start_list[i], end_list[j]))
@@ -144,9 +145,9 @@ def sequence_missing_repetition_entry_alert(sequence):
                 error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
                 j += 1
         if i<len(start_list):
-            error_list.extend([item + 'ends missing for start at ' + str(start_list[s]) for s in start_list[i:]])
+            error_list.extend([item + 'ends missing for start at ' + str(start_list[s]) for s in range(i, len(start_list))])
         if j<len(end_list):
-            error_list.extend([item + 'starts missing for end at ' + str(end_list[s]) for s in end_list[j:]])
+            error_list.extend([item + 'starts missing for end at ' + str(end_list[s]) for s in range(i, len(start_list))])
     return error_list, region_map
 
 # '''
@@ -312,12 +313,12 @@ def total_listen_time(cf, region_map, month67=False):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
 
-    # '''
-    # This is only used for month 6 and 7.
-    # The total time where skip and silence regions overlap are computed so as to be subtracted from silence time computed later.
-    # '''
-    # Only used for month 6 and 7
     def skip_silence_overlap_time():
+        ''' This is only used for month 6 and 7.
+            The total time where skip and silence regions overlap are computed so as to be subtracted from silence time computed later.
+        '''
+    # Only used for month 6 and 7
+
         skip_start_times = region_map['skip']['starts']
         skip_end_times = region_map['skip']['ends']
         silence_start_times = region_map['silence']['starts']
@@ -424,7 +425,9 @@ def total_listen_time(cf, region_map, month67=False):
         skip_silence_time = skip_silence_overlap_time()
         skip_time = skip_region_time()
         silence_time = silence_region_time()
+        print(silence_time)
         total_time = cf.line_map[-1].offset
+        print(total_time)
         result['subregion_time'] = 0
         result['num_subregion_with_annot'] = 0
         result['skip_time'] = skip_time - skip_silence_time
@@ -457,17 +460,22 @@ def process_single_file(file, file_path=cha_structure_path):
         f.write('\n')
         f.write('\n'.join(error_list))
     if error_list:
-        print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
+        print(bcolors.WARNING + "Finished {0} with errors! Listen time cannot be calculated due to missing starts or ends!\nCheck the {0}.txt file for errors!".format(os.path.basename(file)) + bcolors.ENDC)
         file_with_error.append((os.path.basename(file), error_list))
+    
+    # If the file with error has a missing start or end error, we cannot correctly process it! So return!
+    for item in error_list:
+        if 'missing' in item:
+            return
 
     if os.path.basename(file)[3:5] in ['06', '07']:
         listen_time = total_listen_time(cf, region_map, month67=True)
-        listen_time_summary.append((os.path.basename(file), listen_time))
-        print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
     else:
         listen_time = total_listen_time(cf, region_map)
-        listen_time_summary.append((os.path.basename(file), listen_time))
-        print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+        
+    listen_time_summary.append((os.path.basename(file), listen_time))
+    print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+
 
 if __name__ == "__main__":
     path_file = sys.argv[1]

@@ -10,3 +10,10 @@ output
 .DS_Store
 *.pyc
 *.swp
+.Rproj.user
+
+hists.py
+plots/
+*.RData
+*.Rhistory
+month_plots/
