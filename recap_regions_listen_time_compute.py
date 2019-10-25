@@ -3,7 +3,6 @@ import csv
 import re
 import sys
 import os.path
-import pandas as pd
 from multiprocessing import Pool, Manager
 import pdb
 
@@ -392,56 +391,42 @@ def total_listen_time(cf, region_map, month67=False):
         remove_subregions_without_annotations()
         remove_subregions_nested_in_silence_regions()
         remove_silence_regions_outside_subregions()
-
-
-        subregion_time, num_subregion_with_annot = annotated_subregion_time()
-        result['subregion_time'] = subregion_time
-        result['num_subregion_with_annot'] = num_subregion_with_annot
-
-        skip_time = skip_region_time()
-        result['skip_time'] = skip_region_time()
-
-        silence_time = silence_region_time()
-        result['silence_time'] = silence_time
-
-        extra_time, num_extra_region = extra_region_time()
-        result['extra_time'] = extra_time
-        result['num_extra_region'] = num_extra_region
-
-        makeup_time, num_makeup_region = makeup_region_time()
-        result['makeup_time'] = makeup_time
-        result['num_makeup_region'] = num_makeup_region
-
-        surplus_time, num_surplus_region = surplus_region_time()
-        result['surplus_time'] = surplus_time
-        result['num_surplus_region'] = num_surplus_region
-
-        result['total_listen_time'] = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
-        result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
-
-        return result
+                      
     else:
         # Preprocessing
         skip_silence_time = skip_silence_overlap_time()
         skip_time = skip_region_time()
         silence_time = silence_region_time()
-        print(silence_time)
         total_time = cf.line_map[-1].offset
-        print(total_time)
-        result['subregion_time'] = 0
-        result['num_subregion_with_annot'] = 0
-        result['skip_time'] = skip_time - skip_silence_time
-        result['silence_time'] = silence_time
-        result['extra_time'] = 0
-        result['surplus_time'] = 0
-        result['num_extra_region'] = 0
-        result['makeup_time'] = 0
-        result['num_makeup_region'] = 0
-        result['num_surplus_region'] = 0
-        result['total_listen_time'] = total_time - silence_time
-        result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
 
-        return result
+    subregion_time, num_subregion_with_annot = annotated_subregion_time()
+    result['subregion_time'] = subregion_time
+    result['num_subregion_with_annot'] = num_subregion_with_annot
+
+    skip_time = skip_region_time()
+    result['skip_time'] = skip_time
+
+    silence_time = silence_region_time()
+    result['silence_time'] = silence_time
+
+    extra_time, num_extra_region = extra_region_time()
+    result['extra_time'] = extra_time
+    result['num_extra_region'] = num_extra_region     
+
+    makeup_time, num_makeup_region = makeup_region_time()
+    result['makeup_time'] = makeup_time
+    result['num_makeup_region'] = num_makeup_region          
+
+    surplus_time, num_surplus_region = surplus_region_time()
+    result['surplus_time'] = surplus_time
+    result['num_surplus_region'] = num_surplus_region
+
+    # PICK ONE OF THESE TWO!
+    result['total_listen_time'] = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
+    result['total_listen_time'] = total_time - silence_time
+
+    result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
+    return result
 
 def process_single_file(file, file_path=cha_structure_path):
 
