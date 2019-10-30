@@ -1,11 +1,9 @@
 all_cha
 problems
-*.txt
 *.cha
 test
 .idea
 problemfile_comments
-output
 .vscode
 .DS_Store
 *.pyc

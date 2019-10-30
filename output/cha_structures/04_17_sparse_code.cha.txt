@@ -1,0 +1,12 @@
+subregion starts   1500000
+subregion ends   5100000
+subregion starts   14700000
+subregion ends   18300000
+subregion starts   24300000
+subregion ends   27900000
+subregion starts   30300000
+subregion ends   33900000
+subregion starts   34800000
+subregion ends   38400000
+
+

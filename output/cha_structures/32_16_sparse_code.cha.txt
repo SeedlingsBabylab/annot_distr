@@ -1,0 +1,18 @@
+silence starts   7934010
+silence ends   16484290
+silence starts   18934840
+silence ends   21226600
+subregion starts   21900000
+subregion ends   25500000
+subregion starts   26700000
+subregion ends   30300000
+subregion starts   31800000
+subregion starts   35400000
+subregion ends   35400000
+subregion ends   39000000
+subregion starts   43500000
+subregion ends   47100000
+silence starts   49975480
+silence ends   57599990
+
+
