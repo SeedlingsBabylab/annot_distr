@@ -494,9 +494,9 @@ if __name__ == "__main__":
         output_path = 'output'
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
-    if not os.path.isdir(os.path.join(output_path, 'cha structures')):
-        os.mkdir(os.path.join(output_path, 'cha structures'))
-    cha_structure_path = os.path.join(output_path, 'cha structures')
+    if not os.path.isdir(os.path.join(output_path, 'cha_structures')):
+        os.mkdir(os.path.join(output_path, 'cha_structures'))
+    cha_structure_path = os.path.join(output_path, 'cha_structures')
 
     #cha_dir = sys.argv[1]
     #files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
@@ -515,13 +515,13 @@ if __name__ == "__main__":
         listen_time_summary = manager.list()
         p = Pool(6)
         p.map(process_single_file, files)
-        with open(os.path.join(output_path, 'Error Summary.txt'), 'w') as f:
+        with open(os.path.join(output_path, 'Error_Summary.txt'), 'w') as f:
             for entry in file_with_error:
                 f.write(entry[0]+'\n')
                 for error in entry[1]:
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
-        with open(os.path.join(output_path, 'Total Listen Time Summary.csv'), 'w') as f:
+        with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'w') as f:
             f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
