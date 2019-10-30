@@ -537,13 +537,13 @@ if __name__ == "__main__":
         for file in files:
             process_single_file(file, cha_structure_path)
 
-        with open(os.path.join(output_path, 'Error Summary.txt'), 'w') as f:
+        with open(os.path.join(output_path, 'Error_Summary.txt'), 'w') as f:
             for entry in file_with_error:
                 f.write(entry[0]+'\n')
                 for error in entry[1]:
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
-        with open(os.path.join(output_path, 'Total Listen Time Summary.csv'), 'w') as f:
+        with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'w') as f:
             f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
