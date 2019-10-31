@@ -1,0 +1,26 @@
+15_06_sparse_code.cha
+				Found a nesting! skip end at 20135250 is nested between skip start at 19524760 and skip end at 25771420
+				Found a nesting! skip end at 25771420 is nested between skip start at 25208290 and skip end at 26030470
+				Found a nesting! skip end at 26030470 is nested between skip start at 25939590 and skip end at 26474610
+				Found a nesting! skip end at 26474610 is nested between skip start at 26106240 and skip end at 26657240
+				Found a nesting! skip end at 26657240 is nested between skip start at 26552680 and skip end at 27831800
+				Found a nesting! skip end at 27831800 is nested between skip start at 27253140 and skip end at 34808910
+				Found a nesting! skip end at 34808910 is nested between skip start at 34642930 and skip end at 35667610
+				Found a nesting! skip end at 35667610 is nested between skip start at 35580480 and skip end at 38659160
+				Found a nesting! skip end at 38659160 is nested between skip start at 38481190 and skip end at 38668250
+
+15_09_sparse_code.cha
+				Found a nesting! makeup end at 1339940 is nested between makeup start at 34120 and makeup end at 3599340
+
+21_06_sparse_code.cha
+				Found a nesting! skip end at 33638690 is nested between skip start at 32371230 and skip end at 35049210
+				Found a nesting! skip end at 35049210 is nested between skip start at 33474180 and skip end at 35793860
+				Found a nesting! skip end at 35793860 is nested between skip start at 35266730 and skip end at 36366290
+				Found a nesting! skip end at 36366290 is nested between skip start at 36092010 and skip end at 37080140
+				Found a nesting! skip end at 37080140 is nested between skip start at 36967090 and skip end at 37478870
+				Found a nesting! skip end at 37478870 is nested between skip start at 37097980 and skip end at 38271210
+				Found a nesting! skip end at 38271210 is nested between skip start at 37512960 and skip end at 38879430
+				Found a nesting! skip end at 38879430 is nested between skip start at 38300530 and skip end at 41685730
+				Found a nesting! skip end at 41685730 is nested between skip start at 40765250 and skip end at 46375500
+				skipends missing for start at 44643500
+

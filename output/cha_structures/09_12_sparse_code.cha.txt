@@ -1,0 +1,32 @@
+extra starts   3130
+subregion starts   1200000
+extra ends   1200000
+subregion starts   4800000
+subregion ends   4800000
+makeup starts   4803270
+silence starts   6315900
+makeup ends   6315900
+subregion ends   8400000
+subregion starts   11100000
+skip starts   11100000
+silence ends   11710880
+skip ends   11744270
+skip starts   11859060
+skip ends   12453480
+subregion ends   14700000
+extra starts   14780470
+extra ends   17183570
+subregion starts   19200000
+skip starts   20943810
+silence starts   21371760
+skip ends   22800000
+subregion ends   22800000
+subregion starts   32100000
+silence ends   32549800
+subregion ends   35700000
+silence starts   37130020
+silence ends   43606930
+silence starts   57599990
+silence ends   57599990
+
+

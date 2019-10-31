@@ -1,0 +1,16 @@
+subregion starts   12300000
+subregion ends   15900000
+silence starts   17863470
+silence ends   20894240
+subregion starts   22800000
+subregion ends   26400000
+subregion starts   30900000
+subregion ends   34500000
+subregion starts   36000000
+subregion ends   39600000
+subregion starts   41100000
+subregion ends   44700000
+silence starts   46607990
+silence ends   57599990
+
+
