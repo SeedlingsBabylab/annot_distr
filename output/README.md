@@ -19,3 +19,5 @@ Filename | Subregion Total/ms | Makeup Total/ms | Extra Total/ms | Surplus Total
 01_06_sparse_code.cha | 0 | 0 | 0 | 0 | 21101110 | 35811840 | 0 | 0 | 0 | 0 | 36498880 | 10.1385777778
 01_07_sparse_code.cha | 0 | 0 | 0 | 0 | 22274360 | 737060 | 0 | 0 | 0 | 0 | 35325630 | 9.812675
 01_08_sparse_code.cha | 7200000 | 0 | 300240 | 6092080 | 0 | 0 | 2 | 1 | 0 | 3 | 13592320 | 3.77564444444
+
+For months 6 and 7, the Total Listen Time is calculated by subtracting Silence Total and Skip Total from the last offset in the cha file. 
