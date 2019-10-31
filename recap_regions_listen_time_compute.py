@@ -328,7 +328,7 @@ def total_listen_time(cf, region_map, month67=False):
                 if skip_start_times[i]>=silence_start_times[j] and skip_start_times[i]<=silence_end_times[j]:
                     overlap_time += min(silence_end_times[j], skip_end_times[i]) - skip_start_times[i]
                 elif skip_end_times[i]>=silence_start_times[j] and skip_end_times[i]<=silence_end_times[j]:
-                    overlap_time += max(silence_start_times[j], skip_start_times[i]) - skip_end_times[i]
+                    overlap_time += skip_end_times[i] - max(silence_start_times[j], skip_start_times[i])
         return overlap_time
 
     def annotated_subregion_time():
@@ -397,8 +397,7 @@ def total_listen_time(cf, region_map, month67=False):
         skip_silence_time = skip_silence_overlap_time()
         skip_time = skip_region_time()
         silence_time = silence_region_time()
-        total_time = cf.line_map[-1].offset
-
+        
     subregion_time, num_subregion_with_annot = annotated_subregion_time()
     result['subregion_time'] = subregion_time
     result['num_subregion_with_annot'] = num_subregion_with_annot
@@ -421,9 +420,15 @@ def total_listen_time(cf, region_map, month67=False):
     result['surplus_time'] = surplus_time
     result['num_surplus_region'] = num_surplus_region
 
-    # PICK ONE OF THESE TWO!
-    result['total_listen_time'] = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
-    result['total_listen_time'] = total_time - silence_time
+    # If the file is not a 6 or 7 month file, we add/subtract regions to get total time.
+    if not month67:
+        total_time = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
+    # Otherwise, we assume that the entire file was listened to, so we do not touch anything. 
+    else:
+        print('{} - ({} + {} - {})'.format(cf.line_map[-1].offset, skip_time, silence_time, skip_silence_time))
+        total_time = cf.line_map[-1].offset - (skip_time + silence_time - skip_silence_time)
+
+    result['total_listen_time'] = total_time
 
     result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
     return result
