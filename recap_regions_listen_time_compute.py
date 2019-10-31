@@ -10,6 +10,7 @@ import pdb
 file_with_error = []
 cha_structure_path = ""
 listen_time_summary = []
+PRECISION = 2
 
 class bcolors:
     HEADER = '\033[95m'
@@ -26,7 +27,7 @@ subr_regx = re.compile(r'subregion (\d*) ?of (\d*)') # There are some cases wher
 code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
 subr_time_regx = re.compile(r'at (\d+)')
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra", "surplus"]
-keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "surplus starts":6, "subregion ends": 12, "silence ends": 11, "skip ends": 10, "makeup ends": 8, "extra ends": 8, "surplus ends":7}
+keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "surplus starts":6, "subregion ends": 12, "silence ends": 11, "skip ends": 10, "makeup ends": 8, "extra ends": 8, "surplus ends": 7}
 
 
 # '''
@@ -399,25 +400,25 @@ def total_listen_time(cf, region_map, month67=False):
         silence_time = silence_region_time()
         
     subregion_time, num_subregion_with_annot = annotated_subregion_time()
-    result['subregion_time'] = subregion_time
+    result['subregion_time'] = round(subregion_time, PRECISION)
     result['num_subregion_with_annot'] = num_subregion_with_annot
 
     skip_time = skip_region_time()
-    result['skip_time'] = skip_time
+    result['skip_time'] = round(skip_time, PRECISION)
 
     silence_time = silence_region_time()
-    result['silence_time'] = silence_time
+    result['silence_time'] = round(silence_time, PRECISION)
 
     extra_time, num_extra_region = extra_region_time()
-    result['extra_time'] = extra_time
+    result['extra_time'] = round(extra_time, PRECISION)
     result['num_extra_region'] = num_extra_region     
 
     makeup_time, num_makeup_region = makeup_region_time()
-    result['makeup_time'] = makeup_time
+    result['makeup_time'] = round(makeup_time, PRECISION)
     result['num_makeup_region'] = num_makeup_region          
 
     surplus_time, num_surplus_region = surplus_region_time()
-    result['surplus_time'] = surplus_time
+    result['surplus_time'] = round(surplus_time, PRECISION)
     result['num_surplus_region'] = num_surplus_region
 
     # If the file is not a 6 or 7 month file, we add/subtract regions to get total time.
