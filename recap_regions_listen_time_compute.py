@@ -494,7 +494,8 @@ def process_single_file(file, file_path=cha_structure_path):
     else:
         listen_time = total_listen_time(cf, region_map)
         
-    listen_time_summary.append((os.path.basename(file), listen_time))
+    listen_time['file_name'] = os.path.basename(file)
+    listen_time_summary.append(listen_time)
     print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
 
 # Convert milliseconds to hours!
@@ -509,7 +510,7 @@ def output(file_with_error, listen_time_summary):
             for error in entry[1]:
                 f.write('\t\t\t\t'+error+'\n')
             f.write('\n')
-    with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'w') as f:
+    with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'wb') as f:
         f.write(HEADER)
         listen_time_summary = list(listen_time_summary)
         listen_time_summary.sort(key = lambda k: k[0])
