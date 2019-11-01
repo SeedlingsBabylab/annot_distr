@@ -6,7 +6,7 @@ import os.path
 from multiprocessing import Pool, Manager
 import pdb
 
-cha_structure_path = ""
+cha_structure_path = "output/cha_structures"
 listen_time_summary = []
 
 # Precision for rounding the millisecond values. 
@@ -30,6 +30,28 @@ HEADER_LIST = [
         ] 
 
 HEADER = ','.join(HEADER_LIST)
+
+FIELD_NAMES = [
+    'filename',
+    'subregion_time',
+    'subregion_time_hour',
+    'skip_time',
+    'num_makeup_region',
+    'skip_time_hour',
+    'num_subregion_with_annot',
+    'surplus_time_hour',
+    'silence_time_hour',
+    'total_listen_time',
+    'num_extra_region',
+    'silence_time',
+    'extra_time_hour',
+    'makeup_time_hour',
+    'num_surplus_region',
+    'surplus_time',
+    'makeup_time',
+    'extra_time',
+    'total_listen_time_hour'
+     ]
 
 class bcolors:
     HEADER = '\033[95m'
@@ -494,7 +516,7 @@ def process_single_file(file, file_path=cha_structure_path):
     else:
         listen_time = total_listen_time(cf, region_map)
         
-    listen_time['file_name'] = os.path.basename(file)
+    listen_time['filename'] = os.path.basename(file)
     listen_time_summary.append(listen_time)
     print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
 
@@ -510,15 +532,14 @@ def output(file_with_error, listen_time_summary):
             for error in entry[1]:
                 f.write('\t\t\t\t'+error+'\n')
             f.write('\n')
+
+    # Writing to the total listen time summary file
     with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'wb') as f:
-        f.write(HEADER)
+        writer = csv.DictWriter(f, fieldnames=FIELD_NAMES)
+        writer.writeheader()
         listen_time_summary = list(listen_time_summary)
-        listen_time_summary.sort(key = lambda k: k[0])
-        for entry in listen_time_summary:
-            f.write(entry[0]+',')
-            f.write('{},{},{},{},{},{},'.format(str(entry[1]['subregion_time']), str(entry[1]['makeup_time']), str(entry[1]['extra_time']), str(entry[1]['surplus_time']), str(entry[1]['silence_time']), str(entry[1]['skip_time'])))
-            f.write('{},{},{},{},'.format(str(entry[1]['num_subregion_with_annot']), str(entry[1]['num_extra_region']), str(entry[1]['num_makeup_region']), str(entry[1]['num_surplus_region'])))
-            f.write('{},{}\n'.format(str(entry[1]['total_listen_time']), str(entry[1]['total_listen_time_hour'])))
+        listen_time_summary.sort(key = lambda k: k['filename'])
+        writer.writerows(listen_time_summary)
 
 if __name__ == "__main__":
     path_file = sys.argv[1]
