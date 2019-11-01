@@ -10,7 +10,28 @@ import pdb
 file_with_error = []
 cha_structure_path = ""
 listen_time_summary = []
+
+# Precision for rounding the millisecond values. 
 PRECISION = 2
+
+# Use the HEADER variable instead of just rewriting the strings all the time
+HEADER_LIST = [
+        'Filename', 
+        'Subregion Total/ms', 
+        'Makeup Total/ms', 
+        'Extra Total/ms', 
+        'Surplus Total/ms', 
+        'Silence Total/ms', 
+        'Skip Total/ms', 
+        'Num Subregion with Annots', 
+        'Num Extra Region', 
+        'Num Makeup Region', 
+        'Num Surplus Region', 
+        'Total Listen Time/ms', 
+        'Total Listen Time/hour\n'
+        ] 
+
+HEADER = ','.join(HEADER_LIST)
 
 class bcolors:
     HEADER = '\033[95m'
@@ -400,38 +421,49 @@ def total_listen_time(cf, region_map, month67=False):
         silence_time = silence_region_time()
         
     subregion_time, num_subregion_with_annot = annotated_subregion_time()
-    result['subregion_time'] = round(subregion_time, PRECISION)
+    result['subregion_time'] = subregion_time
     result['num_subregion_with_annot'] = num_subregion_with_annot
+    result['subregion_time_hour'] = ms2hr(subregion_time)
 
     skip_time = skip_region_time()
-    result['skip_time'] = round(skip_time, PRECISION)
+    result['skip_time'] = skip_time
+    result['skip_time_hour'] = ms2hr(skip_time)
 
     silence_time = silence_region_time()
-    result['silence_time'] = round(silence_time, PRECISION)
+    result['silence_time'] = silence_time
+    result['silence_time_hour'] = ms2hr(silence_time)
 
     extra_time, num_extra_region = extra_region_time()
-    result['extra_time'] = round(extra_time, PRECISION)
+    result['extra_time'] = extra_time
     result['num_extra_region'] = num_extra_region     
+    result['extra_time_hour'] = ms2hr(extra_time)
 
     makeup_time, num_makeup_region = makeup_region_time()
-    result['makeup_time'] = round(makeup_time, PRECISION)
+    result['makeup_time'] = makeup_time
     result['num_makeup_region'] = num_makeup_region          
+    result['makeup_time_hour'] = ms2hr(makeup_time)
 
     surplus_time, num_surplus_region = surplus_region_time()
-    result['surplus_time'] = round(surplus_time, PRECISION)
+    result['surplus_time'] = surplus_time
     result['num_surplus_region'] = num_surplus_region
+    result['surplus_time_hour'] = ms2hr(surplus_time)
+
+    print(subregion_time, skip_time, silence_time)
+
 
     # If the file is not a 6 or 7 month file, we add/subtract regions to get total time.
     if not month67:
         total_time = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
+
     # Otherwise, we assume that the entire file was listened to, so we do not touch anything. 
     else:
-        print('{} - ({} + {} - {})'.format(cf.line_map[-1].offset, skip_time, silence_time, skip_silence_time))
         total_time = cf.line_map[-1].offset - (skip_time + silence_time - skip_silence_time)
-
+        print('{} - ({} + {} - {}) == {}'.format(cf.line_map[-1].offset, skip_time, silence_time, skip_silence_time, total_time))
+        print(cf.line_map[-1].offset - (skip_time + silence_time - skip_silence_time) == total_time)
+        
     result['total_listen_time'] = total_time
 
-    result['total_listen_time_hour'] = result['total_listen_time']/3600000.0
+    result['total_listen_time_hour'] = ms2hr(total_time)
     return result
 
 def process_single_file(file, file_path=cha_structure_path):
@@ -466,6 +498,10 @@ def process_single_file(file, file_path=cha_structure_path):
         
     listen_time_summary.append((os.path.basename(file), listen_time))
     print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+
+# Convert milliseconds to hours!
+def ms2hr(ms):
+    return round(ms / 3600000.0, PRECISION)
 
 
 if __name__ == "__main__":
@@ -513,7 +549,7 @@ if __name__ == "__main__":
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
         with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'w') as f:
-            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
+            f.write(HEADER)
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
             for entry in listen_time_summary:
@@ -535,7 +571,7 @@ if __name__ == "__main__":
                     f.write('\t\t\t\t'+error+'\n')
                 f.write('\n')
         with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'w') as f:
-            f.write('Filename,Subregion Total/ms,Makeup Total/ms,Extra Total/ms,Surplus Total/ms,Silence Total/ms,Skip Total/ms,Num Subregion with Annots,Num Extra Region,Num Makeup Region,Num Surplus Region,Total Listen Time/ms,Total Listen Time/hour\n')
+            f.write(HEADER)
             listen_time_summary = list(listen_time_summary)
             listen_time_summary.sort(key = lambda k: k[0])
             for entry in listen_time_summary:
