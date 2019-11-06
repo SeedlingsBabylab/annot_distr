@@ -12,32 +12,12 @@ listen_time_summary = []
 # Precision for rounding the millisecond values. 
 PRECISION = 2
 
-# Use the HEADER variable instead of just rewriting the strings all the time
-HEADER_LIST = [
-        'Filename', 
-        'Subregion Total/ms', 
-        'Makeup Total/ms', 
-        'Extra Total/ms', 
-        'Surplus Total/ms', 
-        'Silence Total/ms', 
-        'Skip Total/ms', 
-        'Num Subregion with Annots', 
-        'Num Extra Region', 
-        'Num Makeup Region', 
-        'Num Surplus Region', 
-        'Total Listen Time/ms', 
-        'Total Listen Time/hour\n'
-        ] 
-
-HEADER = ','.join(HEADER_LIST)
-
+# These are the header fields for the summary csv output. 
 FIELD_NAMES = [
     'filename',
     'subregion_time',
-    'subregion_time_hour',
     'skip_time',
     'num_makeup_region',
-    'skip_time_hour',
     'num_subregion_with_annot',
     'surplus_time_hour',
     'silence_time_hour',
@@ -50,7 +30,9 @@ FIELD_NAMES = [
     'surplus_time',
     'makeup_time',
     'extra_time',
-    'total_listen_time_hour'
+    'subregion_time_hour',
+    'skip_time_hour',
+    'total_listen_time_hour',
      ]
 
 class bcolors:
@@ -482,6 +464,8 @@ def total_listen_time(cf, region_map, month67=False):
         print(cf.line_map[-1].offset - (skip_time + silence_time - skip_silence_time) == total_time)
         
     result['total_listen_time'] = total_time
+
+    result['end_time_hour'] = ms2hr(cf.line_map[-1].offset)
 
     result['total_listen_time_hour'] = ms2hr(total_time)
     return result
