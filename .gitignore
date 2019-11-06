@@ -8,6 +8,7 @@ problemfile_comments
 .DS_Store
 *.pyc
 *.swp
+.Rhistory
 
 hists.py
 plots/

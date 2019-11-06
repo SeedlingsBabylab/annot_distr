@@ -19,19 +19,21 @@ FIELD_NAMES = [
     'skip_time',
     'num_makeup_region',
     'num_subregion_with_annot',
-    'surplus_time_hour',
-    'silence_time_hour',
     'total_listen_time',
     'num_extra_region',
     'silence_time',
-    'extra_time_hour',
-    'makeup_time_hour',
     'num_surplus_region',
     'surplus_time',
     'makeup_time',
     'extra_time',
+    'extra_time_hour',
+    'makeup_time_hour',
+    'surplus_time_hour',
+    'silence_time_hour',
     'subregion_time_hour',
     'skip_time_hour',
+    'skip_silence_overlap_hour',
+    'end_time_hour',
     'total_listen_time_hour',
      ]
 
@@ -415,12 +417,14 @@ def total_listen_time(cf, region_map, month67=False):
         remove_subregions_without_annotations()
         remove_subregions_nested_in_silence_regions()
         remove_silence_regions_outside_subregions()
+        result['skip_silence_overlap_hour'] = 0
                       
     else:
         # Preprocessing
         skip_silence_time = skip_silence_overlap_time()
         skip_time = skip_region_time()
         silence_time = silence_region_time()
+        result['skip_silence_overlap_hour'] = ms2hr(skip_silence_time)
         
     subregion_time, num_subregion_with_annot = annotated_subregion_time()
     result['subregion_time'] = subregion_time
