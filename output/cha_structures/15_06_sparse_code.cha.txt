@@ -16,7 +16,6 @@ skip starts   11642250
 skip ends   11885040
 skip starts   11909420
 skip ends   12401570
-skip starts   12447570
 silence starts   13347680
 silence ends   19523860
 skip starts   19524760
@@ -38,7 +37,6 @@ skip ends   34808910
 skip starts   35580480
 skip ends   35667610
 skip starts   38481190
-skip ends   38659160
 skip ends   38668250
 skip starts   43881770
 skip ends   44268900
@@ -52,12 +50,3 @@ silence starts   51983980
 silence ends   57599990
 
 
-Found a nesting! skip end at 20135250 is nested between skip start at 19524760 and skip end at 25771420
-Found a nesting! skip end at 25771420 is nested between skip start at 25208290 and skip end at 26030470
-Found a nesting! skip end at 26030470 is nested between skip start at 25939590 and skip end at 26474610
-Found a nesting! skip end at 26474610 is nested between skip start at 26106240 and skip end at 26657240
-Found a nesting! skip end at 26657240 is nested between skip start at 26552680 and skip end at 27831800
-Found a nesting! skip end at 27831800 is nested between skip start at 27253140 and skip end at 34808910
-Found a nesting! skip end at 34808910 is nested between skip start at 34642930 and skip end at 35667610
-Found a nesting! skip end at 35667610 is nested between skip start at 35580480 and skip end at 38659160
-Found a nesting! skip end at 38659160 is nested between skip start at 38481190 and skip end at 38668250
