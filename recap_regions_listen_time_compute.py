@@ -35,6 +35,9 @@ FIELD_NAMES = [
     'skip_silence_overlap_hour',
     'end_time_hour',
     'total_listen_time_hour',
+    'silence_raw_hour',
+    'subregion_raw_hour',
+    'num_raw_subregion'
      ]
 
 class bcolors:
@@ -411,6 +414,13 @@ def total_listen_time(cf, region_map, month67=False):
         return total_time, len(start_times)
 
     result = {}
+
+    # Here we add the raw totals for skip and subregion to the result dictionary. By raw, we mean that the preprocessing steps below are not done. These items are for diagnostic purposes. 
+
+    result['silence_raw_hour'] = ms2hr(silence_region_time())
+    shour, snum = annotated_subregion_time()
+    result['num_raw_subregion'], result['subregion_raw_hour'] = snum, ms2hr(shour)
+
     if not month67:
         # Preprocessing
         remove_subregions_with_surplus()

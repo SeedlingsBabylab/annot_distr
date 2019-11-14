@@ -69,7 +69,7 @@ Please find below additional analysis and listings of problematics files.
 Calculation formula for these months is as follows:
 
 $$total\_listen\_time\_hour = end\_time\_hour - (skip\_time\_hour + silence\_time\_hour - skip\_silence\_overlap\_hour)$$
-According to this calculation, the files below are listed as **problematic** since their total listen time is either below or above a certain value.
+According to this calculation, the files below are listed as **problematic** since their total listen time is either below or above a certain value. Note the silence_raw_hour variable. For months 6 and 7, silent and skip regions are **not modified**, hence we do not include their raw versions (instead we calculate their overlap, which is not done for the rest of the months). 
 ```{r sixseven, message=FALSE}
 headers <- c(
   "filename", 
@@ -120,14 +120,16 @@ Unlike months 6 and 7, total_time is obtained by adding up regions, rather than 
 
 * subregions without any annotations are not included. 
 * subregions that have any nested makeup or surplus are removed from the subregion_time sum, since only the surplus or makeup within that region needs to be included. 
-* subregions that have any partial overlap with surplus are also removed from this sum. 
+* subregions that have any partial overlap with surplus are also removed from this sum.
+
+Also note the raw variables, which are unmodified totals. So, for example, while `num_subregion_with_annot` variable only includes the number of subregions with annotations, `num_raw_subregion` includes the count of all subregions. As expected, every file has 5 subregions (except 6 and 7 month files, which don't have subregions). Similarly, `subregion_raw_hour` and `silence_raw_hour` are the totals of these types of regions without the removals according to the rules above. As a sanity check, I added the condition to check if there are less than 5 subregions below. 
 
 Assumed target length: 4 hours
 ```{r eight_to_thirteen}
 eight2thirteen <- 
   listened_time_with_months %>% 
-  filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75)) %>%
-  select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour)
+  filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75 | num_raw_subregion<5)) %>%
+  select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw"))
 ```
 
 
@@ -136,6 +138,7 @@ knitr::kable(eight2thirteen, table.attr='class="bigTable"') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
 
+Aha, only file `45_10`, but that one has an `end_time` (the last time stamp in the cha file) of 5.33, so that doesn't look bad. 
 
 ### month 14-17
 For these months, the calculation is exactly the same as months 8-13, but it the target length is 3 hours. 
@@ -144,7 +147,7 @@ Assumed target length: 3 hours
 fourteen2seventeen <-
   listened_time_with_months %>% 
   filter(month %in% c("14","15","16","17") & (total_listen_time_hour>3.25 | total_listen_time_hour<2.75)) %>%
-  select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour)
+  select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw"))
 
 knitr::kable(fourteen2seventeen) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
