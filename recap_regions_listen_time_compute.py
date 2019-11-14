@@ -262,7 +262,7 @@ def total_listen_time(cf, region_map, month67=False):
 
     # '''
     # Subroutine 4:
-    #     Remove subregions that are completely nested in the silence regions.
+    #     Remove subregions that are completely nested in silent or surplus regions. Partial nesting does not count. 
     # '''
     def remove_subregions_nested_in_silence_regions():
         silence_start_times = region_map['silence']['starts']
@@ -289,7 +289,8 @@ def total_listen_time(cf, region_map, month67=False):
 
     # '''
     # Subroutine 5:
-    #     Remove parts of the subregions that are overlapping with silence regions.
+    #     If a silent region partially overlaps with a subregion, remove the NON-OVERLAPPING portion of that silent region (since we don't subtract that part in our calculation.
+    #     Otherwise, if the silent region does not overlap with the subregion at all, completely remove it! 
     # '''
     def remove_silence_regions_outside_subregions():
         silence_start_times = region_map['silence']['starts']
@@ -300,16 +301,16 @@ def total_listen_time(cf, region_map, month67=False):
         while i>=0:
             remove = True
             for j in range(len(subregion_start_times)):
+                # If the silent region i start time is between start and end of subregion j
                 if silence_start_times[i]>=subregion_start_times[j] and silence_start_times[i]<=subregion_end_times[j]:
+                    # If there is not a complete nesting of the silent region within the subregion! 
                     if silence_end_times[i]>subregion_end_times[j]:
                         silence_end_times.append(silence_end_times[i])
                         silence_start_times.append(subregion_end_times[j]+1)
-                        silence_end_times[i] = min(subregion_end_times[j], silence_end_times[i])
+                        silence_end_times[i] = subregion_end_times[j]
                         i += 2
                         silence_start_times.sort()
                         silence_end_times.sort()
-                    else:
-                        silence_end_times[i] = min(subregion_end_times[j], silence_end_times[i])
                     remove = False
                     break
                 if silence_end_times[i]>=subregion_start_times[j] and silence_end_times[i]<=subregion_end_times[j]:
@@ -329,6 +330,7 @@ def total_listen_time(cf, region_map, month67=False):
         for i in range(len(subregion_start_times)-1, -1, -1):
             remove = False
             for j in range(len(surplus_start_times)):
+                # If surplus start or end is inside the subregion (e.g. there is any kind of overlap)
                 if (subregion_start_times[i]<=surplus_start_times[j] and subregion_end_times[i]>=surplus_start_times[j]) \
                 or (subregion_start_times[i]<=surplus_end_times[j] and subregion_end_times[i]>=surplus_end_times[j]):
                     remove = True

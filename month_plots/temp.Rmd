@@ -4,7 +4,11 @@ author: "Sarp Uner"
 date: "10/22/2019"
 output: html_document
 ---
-
+<style>
+  .bigTable {
+    float:left
+  }
+</style>
 ```{r setup, include=FALSE, fig.width=8, fig.asp=0.618}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = normalizePath(".."))
@@ -106,21 +110,39 @@ knitr::kable(alternative) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 ```
 ### month 8-13
-target length: 4 hours
+For these months, the calculation of listened time is as follows:
+$$total\_time = subregion\_time + extra\_time + makeup\_time + surplus\_time - silence\_time - skip\_time$$
+Unlike months 6 and 7, total_time is obtained by adding up regions, rather than subtracting from the recording's end time. Before using this formula, the script preprocesses all the regions according to certain rules. Some assumptions/procedures/rules the script follows in this calculation:
+* Any region of any type completely nested within a skip is removed.
+* silence_time is the sum of all silent regions that **overlap with** any subregion. So if a silent region is not embedded in a subregion, it is not included in silence_time.
+* subregions without any annotations are not included.
+* subregions that have any nested makeup or surplus are removed from the subregion_time sum, since only the surplus or makeup within that region needs to be included. 
+* subregions that have any partial overlap with surplus are also removed from this sum. 
+
+Assumed target length: 4 hours
 ```{r eight_to_thirteen}
 eight2thirteen <- 
   listened_time_with_months %>% 
   filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75)) %>%
-  select(filename, month, ends_with("hour"))
+  select(filename, month, ends_with("hour"), -end_time_hour, -skip_silence_overlap_hour)
+```
 
-knitr::kable(eight2thirteen) %>%
+
+```{r bigtable}
+knitr::kable(eight2thirteen, table.attr='class="bigTable"') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
 
+
 ### month 14-17
-target length: 3 hours
+For these months, the calculation is exactly the same as months 8-13, but it the target length is 3 hours. 
+Assumed target length: 3 hours
 ```{r fourteen_to_seventeen}
-listened_time_with_months %>% 
-  filter(month %in% c("14","15","16","17") & (total_listen_time_hour>3.25 | total_listen_time_hour<2.75))
-  
+fourteen2seventeen <-
+  listened_time_with_months %>% 
+  filter(month %in% c("14","15","16","17") & (total_listen_time_hour>3.25 | total_listen_time_hour<2.75)) %>%
+  select(filename, month, ends_with("hour"), -end_time_hour, -skip_silence_overlap_hour)
+
+knitr::kable(fourteen2seventeen) %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
