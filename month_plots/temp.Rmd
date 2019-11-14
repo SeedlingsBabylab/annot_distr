@@ -25,31 +25,23 @@ listened_time_with_months <- listened_time %>%
     select(filename, month, everything())
 ```
 
-Here we calculate the average listen time per month in hours, rounded to two decimal places. 
+Here we calculate the average, minimum and maximum listen time per month in hours, rounded to two decimal places. These should be a general indication of issues for that month's listened times.
+
 ```{r avg}
 avgs <- listened_time_with_months %>% 
   group_by(month) %>% 
-  summarise(avg_listen_time = round(mean(total_listen_time_hour), 2))
-
+  summarise(avg_listen_time = round(mean(total_listen_time_hour), 2), 
+            max = max(total_listen_time_hour), 
+            min = min(total_listen_time_hour)
+            )
 knitr::kable(
   avgs,
-  caption = "Mean listened time per month in hours"
+  caption = "Mean, maximum and minimum listened time per month in hours"
 ) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = T, fixed_thead = T)
 
 ```
 
-The maximum and minimum time listened per month. This should be a general indication of issues for that month's listened times.
-```{r maxmin}
-maxmin <- listened_time_with_months %>% #eb: outlier has a technical definition in stats that this doesn't meet
-  group_by(month) %>% 
-  summarise(max = max(total_listen_time_hour), min = min(total_listen_time_hour))
-knitr::kable(
-  maxmin,
-  caption = "The maximum and minimum listened time per month in hours"
-) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F)
-```
 
 Below is a short section of the format of the csv file with only the **hour variables**. This should help with quick sanity checks. Note that for months 6 and 7, total listen time is calculated by subtracting skip and silence times from the last available time stamp in a file. 
 ```{r mutated, echo=FALSE}
@@ -67,27 +59,62 @@ ggplot(data = listened_time_with_months) + geom_histogram(mapping = aes(x = tota
 ```
 
 ## Problem File List
-n.b.: these are only the problematic files IF total_listen_time_hour is being calculated properly, which i'm not sure it is...please look into it.
+Please find below additional analysis and listings of problematics files.
 
 ### month 6 and 7
-these dont' have a 'hard and fast' limit on the length, but i'd double check the ones below to make sure
+Calculation formula for these months is as follows:
+
+$$total\_listen\_time\_hour = end\_time\_hour - (skip\_time\_hour + silence\_time\_hour - skip\_silence\_overlap\_hour)$$
+According to this calculation, the files below are listed as **problematic** since their total listen time is either below or above a certain value.
 ```{r sixseven, message=FALSE}
-knitr::kable(
-sixseven_summary <- listened_time_with_months %>%
-  select(filename, month, silence_time_hour, skip_time_hour, skip_silence_overlap_hour, end_time_hour, total_listen_time_hour) %>%
+headers <- c(
+  "filename", 
+  "month", 
+  "silence_time_hour", 
+  "skip_time_hour", 
+  "skip_silence_overlap_hour", 
+  "end_time_hour", 
+  "total_listen_time_hour"
+  )
+sixseven_summary <- 
+  listened_time_with_months %>%
+  select(headers) %>%
   filter(month %in% c("06","07") & (total_listen_time_hour>12 | total_listen_time_hour<8)) %>%
-  mutate(calculation = sprintf("= %s - (%s + %s - %s)", end_time_hour, skip_time_hour, silence_time_hour, skip_silence_overlap_hour))
-) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F, fixed_thead = T) %>%
-  column_spec(8, width = "2000px")
+  mutate(calculation_of_listen_time_hour = sprintf("= %s - (%s + %s - %s)", end_time_hour, skip_time_hour, silence_time_hour, skip_silence_overlap_hour))
+
+knitr::kable(sixseven_summary) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 ```
 
+Alternatively, based on my discussion with Shannon, we can assume that all skip time is technically **listened**. Note that for this case, we can either assume:
+
+- The overlap between skip and silence is listened (it is considered skip, **column case1**)
+- The overlap between skip and silence is not listened (it is part of silence, **column case2**)
+
+In each case, we have a different calculation as shown below. The resulting listen times are also in the table below, within their respective case columns:
+$$total\_listen\_time\_hour = end\_time\_hour - (silence\_time\_hour - skip\_silence\_overlap\_hour)$$
+$$total\_listen\_time\_hour = end\_time\_hour - silence\_time\_hour$$
+Using these calculations, and assuming the previous thresholds, the files below are flagged as **problematic**, based on either their case1 or case2 values.
+```{r alternative, message = FALSE}
+alternative <- listened_time_with_months %>%
+  filter(month %in% c("06", "07")) %>%
+  select(headers) %>%
+  mutate(case1 = end_time_hour - (silence_time_hour - skip_silence_overlap_hour), case2 = end_time_hour - silence_time_hour) %>%
+  filter(case1 > 12 | case1 < 8 | case2 > 12 | case2 < 8)
+
+knitr::kable(alternative) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
+```
 ### month 8-13
 target length: 4 hours
 ```{r eight_to_thirteen}
-listened_time_with_months %>% 
-  filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75))
-  
+eight2thirteen <- 
+  listened_time_with_months %>% 
+  filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75)) %>%
+  select(filename, month, ends_with("hour"))
+
+knitr::kable(eight2thirteen) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
 
 ### month 14-17
