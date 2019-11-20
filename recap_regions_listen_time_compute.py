@@ -50,12 +50,16 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-
+# Regexes to pull subregion rank and position:
 subr_regx = re.compile(r'subregion (\d*) ?of (\d*)') # There are some cases where the numbering is missing
+rank_regx = re.compile(r'ranked (\d*) ?of (\d*)')
+
 code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(_)([A-Z]{1}[A-Z0-9]{2})(_)?(0x[a-z0-9]{6})?', re.IGNORECASE | re.DOTALL) # Annotation regex
 subr_time_regx = re.compile(r'at (\d+)')
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra", "surplus"]
 keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "surplus starts":6, "subregion ends": 12, "silence ends": 11, "skip ends": 10, "makeup ends": 8, "extra ends": 8, "surplus ends": 7}
+
+subregions = []
 
 
 # '''
@@ -70,12 +74,18 @@ def pull_regions(path):
 
     comments = cf.get_user_comments()
     comments.sort(key = lambda x: x.offset)
-    #print comments
 
     sequence = []
     for cline in comments:
         line = cline.line
+
+        # Pulling subregion information from the line. 
         if 'subregion' in line:
+            #print line
+            #print subr_regx.search(line).group(1)
+            sub_pos = subr_regx.search(line).group(1)
+            #print rank_regx.search(line).group(1)
+            sub_rank = rank_regx.search(line).group(1)
             offset = subr_time_regx.findall(line)
             try:
                 offset = int(offset[0])
@@ -83,8 +93,10 @@ def pull_regions(path):
                 print(bcolors.FAIL + 'Unable to grab time' + bcolors.ENDC)
             if 'starts' in line:
                 sequence.append(('subregion starts', offset))
+            # Only adding after ends in order to not add the position and rank info twice to the subregions list. 
             elif 'ends' in line:
                 sequence.append(('subregion ends', offset))
+                subregions.append('Position: {}, Rank: {}'.format(sub_pos, sub_rank))
         elif 'extra' in line:
             if 'begin' in line:
                 sequence.append(('extra starts', cline.offset))
@@ -112,6 +124,7 @@ def pull_regions(path):
                 sequence.append(('surplus ends', cline.offset))
         # if len(sequence)>1 and sequence[-2][1]==cline.offset:
         #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
+    print subregions
     return sequence, cf
 
 
@@ -202,6 +215,8 @@ def total_listen_time(cf, region_map, month67=False):
                         print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
                         del region_end_times[j]
                         del region_start_times[j]
+                        if region_type == 'subregion':
+                            del subregions[j]
                     elif skip_start_times[i]<=region_start_times[j] and skip_end_times[i]<=region_end_times[j] and skip_end_times[i] >= region_start_times[j]:
                         skip_start_times[i] = region_start_times[j]
                     elif skip_start_times[i]>=region_start_times[j] and skip_end_times[i]>=region_end_times[j] and skip_start_times[i] <= region_end_times[j]:
@@ -215,7 +230,7 @@ def total_listen_time(cf, region_map, month67=False):
     '''
     # '''
     # Subroutine 2:
-    #     Remove all the subregioins that has a makeup region or surplus region inside. This is because only the makeup/surplus region listen time
+    #     Remove all the subregions that has a makeup region or surplus region inside. This is because only the makeup/surplus region listen time
     #     needs to be summed.
     # '''
     def remove_subregions_with_nested_makeup():
@@ -239,6 +254,7 @@ def total_listen_time(cf, region_map, month67=False):
                 print("nested makeup or surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+                del subregions[i]
         #print(subregion_start_times)
 
     # '''
@@ -261,6 +277,7 @@ def total_listen_time(cf, region_map, month67=False):
                 print("no annot", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+                del subregions[i]
         #print(subregion_start_times)
 
     # '''
@@ -288,6 +305,7 @@ def total_listen_time(cf, region_map, month67=False):
                 print("in silence or in surplus", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+                del subregion[i]
         #print(subregion_start_times)
 
     # '''
@@ -342,6 +360,7 @@ def total_listen_time(cf, region_map, month67=False):
                 print("overlap surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+                del subregions[i]
 
     def skip_silence_overlap_time():
         ''' This is only used for month 6 and 7.
@@ -502,23 +521,26 @@ def process_single_file(file, file_path=cha_structure_path):
         f.write('\n')
         f.write('\n')
         f.write('\n'.join(error_list))
-    if error_list:
-        print(bcolors.WARNING + "Finished {0} with errors! Listen time cannot be calculated due to missing starts or ends!\nCheck the {0}.txt file for errors!".format(os.path.basename(file)) + bcolors.ENDC)
-        file_with_error.append((os.path.basename(file), error_list))
-    
-    # If the file with error has a missing start or end error, we cannot correctly process it! So return!
-    for item in error_list:
-        if 'missing' in item:
-            return
+        f.write(' '.join(subregions))
 
-    if os.path.basename(file)[3:5] in ['06', '07']:
-        listen_time = total_listen_time(cf, region_map, month67=True)
-    else:
-        listen_time = total_listen_time(cf, region_map)
+        if error_list:
+            print(bcolors.WARNING + "Finished {0} with errors! Listen time cannot be calculated due to missing starts or ends!\nCheck the {0}.txt file for errors!".format(os.path.basename(file)) + bcolors.ENDC)
+            file_with_error.append((os.path.basename(file), error_list))
         
-    listen_time['filename'] = os.path.basename(file)
-    listen_time_summary.append(listen_time)
-    print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+        # If the file with error has a missing start or end error, we cannot correctly process it! So return!
+        for item in error_list:
+            if 'missing' in item:
+                return
+
+        if os.path.basename(file)[3:5] in ['06', '07']:
+            listen_time = total_listen_time(cf, region_map, month67=True)
+        else:
+            listen_time = total_listen_time(cf, region_map)
+            
+        listen_time['filename'] = os.path.basename(file)
+        listen_time_summary.append(listen_time)
+        print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
+        print subregions
 
 # Convert milliseconds to hours!
 def ms2hr(ms):
@@ -577,7 +599,7 @@ if __name__ == "__main__":
 
         for file in files:
             process_single_file(file, cha_structure_path)
-
+        
     # We output the findings.
     output(file_with_error, listen_time_summary)
 
