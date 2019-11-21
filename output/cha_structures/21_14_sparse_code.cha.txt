@@ -12,3 +12,7 @@ makeup ends   17149530
 subregion ends   20100000
 
 
+
+Position: 1, Rank: 1
+Position: 2, Rank: 2
+Position: 3, Rank: 3

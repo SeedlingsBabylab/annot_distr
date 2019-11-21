@@ -59,7 +59,6 @@ subr_time_regx = re.compile(r'at (\d+)')
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra", "surplus"]
 keyword_rank = {"subregion starts": 1, "silence starts": 2, "skip starts": 3, "makeup starts": 4, "extra starts": 5, "surplus starts":6, "subregion ends": 12, "silence ends": 11, "skip ends": 10, "makeup ends": 8, "extra ends": 8, "surplus ends": 7}
 
-subregions = []
 
 
 # '''
@@ -71,6 +70,8 @@ subregions = []
 # '''
 def pull_regions(path):
     cf = pc.ClanFile(path)
+
+    subregions = []
 
     comments = cf.get_user_comments()
     comments.sort(key = lambda x: x.offset)
@@ -125,7 +126,7 @@ def pull_regions(path):
         # if len(sequence)>1 and sequence[-2][1]==cline.offset:
         #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
     print subregions
-    return sequence, cf
+    return sequence, cf, subregions
 
 
 # '''
@@ -195,7 +196,7 @@ def sequence_missing_repetition_entry_alert(sequence):
 # Step 4:
 #     Compute the total listen time. Several transformations or filterings are done before computing the total listen time.
 # '''
-def total_listen_time(cf, region_map, month67=False):
+def total_listen_time(cf, region_map, subregions, month67 = False):
     # '''
     # Subruotine 1:
     #     Remove all the regions that are completely nested within the skip regions.
@@ -509,7 +510,7 @@ def process_single_file(file, file_path=cha_structure_path):
 
     print("Checking {}".format(os.path.basename(file)))
     try:
-        sequence, cf = pull_regions(file)
+        sequence, cf, subregions = pull_regions(file)
     except:
         print(bcolors.FAIL + "Error opening file: {}".format(file) + bcolors.ENDC)
         return
@@ -521,7 +522,6 @@ def process_single_file(file, file_path=cha_structure_path):
         f.write('\n')
         f.write('\n')
         f.write('\n'.join(error_list))
-        f.write(' '.join(subregions))
 
         if error_list:
             print(bcolors.WARNING + "Finished {0} with errors! Listen time cannot be calculated due to missing starts or ends!\nCheck the {0}.txt file for errors!".format(os.path.basename(file)) + bcolors.ENDC)
@@ -533,9 +533,12 @@ def process_single_file(file, file_path=cha_structure_path):
                 return
 
         if os.path.basename(file)[3:5] in ['06', '07']:
-            listen_time = total_listen_time(cf, region_map, month67=True)
+            listen_time = total_listen_time(cf, region_map, subregions, month67 = True)
         else:
-            listen_time = total_listen_time(cf, region_map)
+            listen_time = total_listen_time(cf, region_map, subregions)
+
+        f.write('\n')
+        f.write('\n'.join(subregions))
             
         listen_time['filename'] = os.path.basename(file)
         listen_time_summary.append(listen_time)
