@@ -1,7 +1,6 @@
 import re
 
 cha_structure_path = "output/cha_structures"
-listen_time_summary = []
 
 # Precision for rounding the millisecond values. 
 PRECISION = 2

@@ -7,80 +7,9 @@ import os.path
 from multiprocessing import Pool, Manager
 import pdb
 from settings import *
+from funcs import pull_regions
 
 
-
-# '''
-# Step 1:
-#     Parse file by pyclan and extract comments from the file.
-#     Go through each comment, if it marks the beginning or ending of the regions,
-#     mark it down to a list of tuples that looks like:
-#     [(subregion starts, timestamp),  (silence starts, timestamp), (silence ends, timestamp)....]
-# '''
-def pull_regions(path):
-    cf = pc.ClanFile(path)
-
-    subregions = []
-
-    comments = cf.get_user_comments()
-    comments.sort(key = lambda x: x.offset)
-
-    sequence = []
-    for cline in comments:
-        line = cline.line
-
-        # Pulling subregion information from the line. 
-
-        if 'subregion' in line:
-            sub_pos = "N/A"
-            sub_rank = "N/A"
-            try:
-                sub_pos = subr_regx.search(line).group(1)
-                sub_rank = rank_regx.search(line).group(1)
-            except AttributeError:
-                print(bcolors.FAIL + 'Subregion time does not exist/is not correct' + bcolors.ENDC)
-                print(bcolors.FAIL + path + bcolors.ENDC)
-
-            offset = subr_time_regx.findall(line)
-            try:
-                offset = int(offset[0])
-            except:
-                print(bcolors.FAIL + 'Unable to grab time' + bcolors.ENDC)
-            if 'starts' in line:
-                sequence.append(('subregion starts', offset))
-            # Only adding after ends in order to not add the position and rank info twice to the subregions list. 
-            elif 'ends' in line:
-                sequence.append(('subregion ends', offset))
-                subregions.append('Position: {}, Rank: {}'.format(sub_pos, sub_rank))
-        elif 'extra' in line:
-            if 'begin' in line:
-                sequence.append(('extra starts', cline.offset))
-            elif 'end' in line:
-                sequence.append(('extra ends', cline.offset))
-        elif 'silence' in line:
-            if 'start' in line:
-                sequence.append(('silence starts', cline.offset))
-            elif 'end' in line:
-                sequence.append(('silence ends', cline.offset))
-        elif 'skip' in line:
-            if 'begin' in line:
-                sequence.append(('skip starts', cline.offset))
-            elif 'end' in line:
-                sequence.append(('skip ends', cline.offset))
-        elif 'makeup' in line or 'make-up' in line or 'make up' in line:
-            if 'begin' in line:
-                sequence.append(('makeup starts', cline.offset))
-            elif 'end' in line:
-                sequence.append(('makeup ends', cline.offset))
-        elif 'surplus' in line:
-            if 'begin' in line:
-                sequence.append(('surplus starts', cline.offset))
-            elif 'end' in line:
-                sequence.append(('surplus ends', cline.offset))
-        # if len(sequence)>1 and sequence[-2][1]==cline.offset:
-        #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
-    print subregions
-    return sequence, cf, subregions
 
 
 # '''
@@ -167,6 +96,8 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
             for i in range(len(skip_start_times)):
                 for j in range(len(region_start_times)-1, -1, -1):
                     if skip_start_times[i]<=region_start_times[j] and skip_end_times[i]>=region_end_times[j]:
+                        print('Remove!')
+                        print("Nested in skip!")
                         print("removed {} {} {}".format(region_type, region_start_times[j], region_end_times[j]))
                         del region_end_times[j]
                         del region_start_times[j]
@@ -206,6 +137,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = True
                     break
             if remove:
+                print('Remove!')
                 print("nested makeup or surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
@@ -229,6 +161,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = False
                     break
             if remove:
+                print('Remove!')
                 print("no annot", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
@@ -257,6 +190,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = True
                     break
             if remove:
+                print('Remove')
                 print("in silence or in surplus", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
@@ -312,6 +246,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = True
                     break
             if remove:
+                print('Remove')
                 print("overlap surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
@@ -499,6 +434,7 @@ def process_single_file(file, file_path=cha_structure_path):
         listen_time_summary.append(listen_time)
         print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
         print subregions
+
 
 # Convert milliseconds to hours!
 def ms2hr(ms):
