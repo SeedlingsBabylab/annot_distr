@@ -1,5 +1,7 @@
 import pyclan as pc
+import os.path
 from settings import *
+import csv
 
 # '''
 # Step 1:
@@ -74,5 +76,36 @@ def pull_regions(path):
         #     print(bcolors.WARNING + "Special case" + bcolors.ENDC)
     print subregions
     return sequence, cf, subregions
+
+def ms2hr(ms):
+    return round(ms / 3600000.0, PRECISION)
+
+def output(file_with_error, listen_time_summary, output_path):
+    with open(os.path.join(output_path, 'Error_Summary.txt'), 'w') as f:
+        for entry in file_with_error:
+            f.write(entry[0]+'\n')
+            for error in entry[1]:
+                f.write('\t\t\t\t'+error+'\n')
+            f.write('\n')
+
+    # Writing to the total listen time summary file
+    with open(os.path.join(output_path, 'Total_Listen_Time_Summary.csv'), 'wb') as f:
+        writer = csv.DictWriter(f, fieldnames=FIELD_NAMES)
+        writer.writeheader()
+        listen_time_summary = list(listen_time_summary)
+        listen_time_summary.sort(key = lambda k: k['filename'])
+        writer.writerows(listen_time_summary)
+
+# '''
+# Step 2:
+#     Sort the output, a list of tuples, from the pull_regions function.
+#     The sorting has two keys, primary key is the timestamp, ascending
+#     secondary sorting key is rank specified in keyword rank.
+#     The purpose of the secondary key is to ensure that when two entries
+#     have the same timestamp, certain sorting order is still maintained.
+# '''
+def sequence_minimal_error_sorting(sequence):
+    sequence = sorted(sequence, key=lambda k: (k[1], keyword_rank[k[0]]))
+    return sequence
 
 

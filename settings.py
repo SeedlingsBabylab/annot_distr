@@ -30,7 +30,10 @@ FIELD_NAMES = [
     'total_listen_time_hour',
     'silence_raw_hour',
     'subregion_raw_hour',
-    'num_raw_subregion'
+    'num_raw_subregion',
+    'subregions',
+    'positions',
+    'ranks'
      ]
 
 class bcolors:

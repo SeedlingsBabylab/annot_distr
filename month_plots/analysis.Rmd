@@ -152,3 +152,14 @@ fourteen2seventeen <-
 knitr::kable(fourteen2seventeen) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
+
+### Positions and Ranks of subregions
+Below, is a table of subregion positions and ranks for each file.
+```{r sub_pos_ranks}
+pos_ranks <- 
+  listened_time %>%
+  select(filename, positions, ranks)
+
+knitr::kable(pos_ranks) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+```
