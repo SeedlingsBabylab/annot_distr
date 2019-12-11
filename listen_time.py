@@ -28,7 +28,8 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                         del region_end_times[j]
                         del region_start_times[j]
                         if region_type == 'subregion':
-                            del subregions[j]
+                            #del subregions[j]
+                            print('')
                     elif skip_start_times[i]<=region_start_times[j] and skip_end_times[i]<=region_end_times[j] and skip_end_times[i] >= region_start_times[j]:
                         skip_start_times[i] = region_start_times[j]
                     elif skip_start_times[i]>=region_start_times[j] and skip_end_times[i]>=region_end_times[j] and skip_start_times[i] <= region_end_times[j]:
@@ -67,7 +68,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 print("nested makeup or surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
-                del subregions[i]
+                #del subregions[i]
         #print(subregion_start_times)
 
     # '''
@@ -81,17 +82,21 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
         for i in range(len(subregion_start_times)-1, -1, -1):
             remove = True
             lines = cf.get_within_time(begin=subregion_start_times[i], end=subregion_end_times[i]).line_map
+            # Hacky way to count the number of annotations in the subregion.
+            count = 0
             for line in lines:
                 annot = code_regx.findall(line.line)
                 if annot:
                     remove = False
-                    break
+                    count += 1
+
+                    
             if remove:
                 print('Remove!')
                 print("no annot", subregion_start_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
-                del subregions[i]
+                #del subregions[i]
         #print(subregion_start_times)
 
     # '''
@@ -176,7 +181,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 print("overlap surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
-                del subregions[i]
+                #del subregions[i]
 
     def skip_silence_overlap_time():
         ''' This is only used for month 6 and 7.

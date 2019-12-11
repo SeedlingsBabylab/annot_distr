@@ -34,47 +34,6 @@ listened_time_with_months <- listened_time %>%
   separate(filename, into = c("subj","month"), sep = "_", extra="drop",remove=F)
 ```
 
-```{r make sr rank and positions long}
-#eb: note: you want ALL five positions and ranks in the spreadsheet but i'm 
-# just showing you how i'd do it for the version of the data that's there now
-#that's why p5 and r5 are all NA--they wont' be with the right data form
-mini_listened_time_data <- listened_time_with_months %>% 
-  dplyr::select(filename, subj, month, subregions, positions, ranks)
-
-ranks_fixed <- mini_listened_time_data %>% 
-  separate(ranks,  into= c("r1","r2","r3","r4","r5"), sep = "', '", remove = F) %>% 
-  #mutate( r1 = str_remove_all(r1, c(literal("['") | literal("[]") | literal(",]""))))
-  mutate( r1 = str_extract(r1, "\\d"),
-          r2 = str_extract(r2, "\\d"),
-          r3 = str_extract(r3, "\\d"),
-          r4 = str_extract(r4, "\\d"),
-          r5 = str_extract(r5, "\\d")) 
-
-ranks_long <- ranks_fixed %>%  
-  dplyr::select(filename, subj, month, r1:r5) %>% 
-  pivot_longer(cols = r1:r5, names_to = "slot", values_to = "rank") %>% 
-  mutate(slot = str_extract(slot, "\\d"))
-
-positions_fixed <- mini_listened_time_data %>% 
-  separate(positions,  into= c("p1","p2","p3","p4","p5"), sep = "', '", remove = F) %>%
-  mutate( p1 = str_extract(p1, "\\d"),
-          p2 = str_extract(p2, "\\d"),
-          p3 = str_extract(p3, "\\d"),
-          p4 = str_extract(p4, "\\d"),
-          p5 = str_extract(p5, "\\d")) 
-
-positions_long <- positions_fixed %>% 
-  dplyr::select(filename, subj, month, p1:p5) %>% 
-  pivot_longer(cols = p1:p5, names_to = "slot", values_to = "position") %>% 
-  mutate(slot = str_extract(slot, "\\d"))
-  
-voila <- left_join(ranks_long, positions_long)
-#eb: double check that this does the right thing by looking at wide & long versions manually
-voila
-mini_listened_time_data %>% dplyr::select(filename, ranks, positions)
-#eb: as long as this does the right thing when you add the 5th SR, should be good!
-
-```
 
 Here we calculate the average, minimum and maximum listen time per month in hours, rounded to two decimal places. These should be a general indication of issues for that month's listened times.
 
@@ -202,11 +161,52 @@ knitr::kable(fourteen2seventeen) %>%
 
 ### Positions and Ranks of subregions
 Below, is a table of subregion positions and ranks for each file.
-```{r sub_pos_ranks}
-pos_ranks <- 
-  listened_time %>%
-  select(filename, positions, ranks)
+```{r make sr rank and positions long, message=FALSE}
+#eb: note: you want ALL five positions and ranks in the spreadsheet but i'm 
+# just showing you how i'd do it for the version of the data that's there now
+#that's why p5 and r5 are all NA--they wont' be with the right data form
+mini_listened_time_data <- listened_time_with_months %>% 
+  dplyr::select(filename, subj, month, subregions, positions, ranks)
 
-knitr::kable(pos_ranks) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+ranks_fixed <- mini_listened_time_data %>% 
+  separate(ranks,  into= c("r1","r2","r3","r4","r5"), sep = "', '", remove = F) %>% 
+  #mutate( r1 = str_remove_all(r1, c(literal("['") | literal("[]") | literal(",]""))))
+  mutate( r1 = str_extract(r1, "\\d"),
+          r2 = str_extract(r2, "\\d"),
+          r3 = str_extract(r3, "\\d"),
+          r4 = str_extract(r4, "\\d"),
+          r5 = str_extract(r5, "\\d")) 
+
+ranks_long <- ranks_fixed %>%  
+  dplyr::select(filename, subj, month, r1:r5) %>% 
+  pivot_longer(cols = r1:r5, names_to = "slot", values_to = "rank") %>% 
+  mutate(slot = str_extract(slot, "\\d"))
+
+positions_fixed <- mini_listened_time_data %>% 
+  separate(positions,  into= c("p1","p2","p3","p4","p5"), sep = "', '", remove = F) %>%
+  mutate( p1 = str_extract(p1, "\\d"),
+          p2 = str_extract(p2, "\\d"),
+          p3 = str_extract(p3, "\\d"),
+          p4 = str_extract(p4, "\\d"),
+          p5 = str_extract(p5, "\\d")) 
+
+positions_long <- positions_fixed %>% 
+  dplyr::select(filename, subj, month, p1:p5) %>% 
+  pivot_longer(cols = p1:p5, names_to = "slot", values_to = "position") %>% 
+  mutate(slot = str_extract(slot, "\\d"))
+  
+voila <- left_join(ranks_long, positions_long)
+#eb: double check that this does the right thing by looking at wide & long versions manually
+voila
+mini_listened_time_data %>% dplyr::select(filename, ranks, positions)
+#eb: as long as this does the right thing when you add the 5th SR, should be good!
+
+final <- 
+  voila %>%
+  filter(!(month %in% c('06', '07'))) %>%
+  arrange(filename, position) %>%
+  select(everything(), -slot)
+
+knitr::kable(final) %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
