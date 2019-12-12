@@ -180,7 +180,7 @@ summary {
 
 <h1 class="title toc-ignore">Listened time analysis by month</h1>
 <h4 class="author">Sarp Uner</h4>
-<h4 class="date">2019-12-11 14:09:40</h4>
+<h4 class="date">2019-12-11 16:01:05</h4>
 
 </div>
 
@@ -4780,22 +4780,8 @@ positions_fixed &lt;- mini_listened_time_data %&gt;%
   
 voila &lt;- left_join(ranks_long, positions_long)
 #eb: double check that this does the right thing by looking at wide &amp; long versions manually
-voila</code></pre>
-<pre><code>## # A tibble: 2,635 x 6
-##    filename              subj  month slot  rank  position
-##    &lt;chr&gt;                 &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;   
-##  1 01_06_sparse_code.cha 01    06    1     &lt;NA&gt;  &lt;NA&gt;    
-##  2 01_06_sparse_code.cha 01    06    2     &lt;NA&gt;  &lt;NA&gt;    
-##  3 01_06_sparse_code.cha 01    06    3     &lt;NA&gt;  &lt;NA&gt;    
-##  4 01_06_sparse_code.cha 01    06    4     &lt;NA&gt;  &lt;NA&gt;    
-##  5 01_06_sparse_code.cha 01    06    5     &lt;NA&gt;  &lt;NA&gt;    
-##  6 01_07_sparse_code.cha 01    07    1     &lt;NA&gt;  &lt;NA&gt;    
-##  7 01_07_sparse_code.cha 01    07    2     &lt;NA&gt;  &lt;NA&gt;    
-##  8 01_07_sparse_code.cha 01    07    3     &lt;NA&gt;  &lt;NA&gt;    
-##  9 01_07_sparse_code.cha 01    07    4     &lt;NA&gt;  &lt;NA&gt;    
-## 10 01_07_sparse_code.cha 01    07    5     &lt;NA&gt;  &lt;NA&gt;    
-## # … with 2,625 more rows</code></pre>
-<pre class="r"><code>mini_listened_time_data %&gt;% dplyr::select(filename, ranks, positions)</code></pre>
+
+mini_listened_time_data %&gt;% dplyr::select(filename, ranks, positions)</code></pre>
 <pre><code>## # A tibble: 527 x 3
 ##    filename              ranks                     positions               
 ##    &lt;chr&gt;                 &lt;chr&gt;                     &lt;chr&gt;                   
@@ -4816,7 +4802,7 @@ final &lt;-
   voila %&gt;%
   filter(!(month %in% c('06', '07'))) %&gt;%
   arrange(filename, position) %&gt;%
-  select(everything(), -slot)
+  select(-slot, filename, subj, month, position, rank)
 
 knitr::kable(final) %&gt;%
       kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;bordered&quot;), full_width = F, fixed_thead = T, position=&quot;left&quot;)</code></pre>

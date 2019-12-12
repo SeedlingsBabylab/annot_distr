@@ -197,7 +197,7 @@ positions_long <- positions_fixed %>%
   
 voila <- left_join(ranks_long, positions_long)
 #eb: double check that this does the right thing by looking at wide & long versions manually
-voila
+
 mini_listened_time_data %>% dplyr::select(filename, ranks, positions)
 #eb: as long as this does the right thing when you add the 5th SR, should be good!
 
@@ -205,7 +205,7 @@ final <-
   voila %>%
   filter(!(month %in% c('06', '07'))) %>%
   arrange(filename, position) %>%
-  select(everything(), -slot)
+  select(-slot, -rank, rank)
 
 knitr::kable(final) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
