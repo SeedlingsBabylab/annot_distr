@@ -33,7 +33,8 @@ FIELD_NAMES = [
     'num_raw_subregion',
     'subregions',
     'positions',
-    'ranks'
+    'ranks',
+    'counts'
      ]
 
 class bcolors:

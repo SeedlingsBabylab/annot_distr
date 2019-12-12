@@ -166,7 +166,7 @@ Below, is a table of subregion positions and ranks for each file.
 # just showing you how i'd do it for the version of the data that's there now
 #that's why p5 and r5 are all NA--they wont' be with the right data form
 mini_listened_time_data <- listened_time_with_months %>% 
-  dplyr::select(filename, subj, month, subregions, positions, ranks)
+  dplyr::select(filename, subj, month, subregions, positions, ranks, counts)
 
 ranks_fixed <- mini_listened_time_data %>% 
   separate(ranks,  into= c("r1","r2","r3","r4","r5"), sep = "', '", remove = F) %>% 
@@ -194,6 +194,21 @@ positions_long <- positions_fixed %>%
   dplyr::select(filename, subj, month, p1:p5) %>% 
   pivot_longer(cols = p1:p5, names_to = "slot", values_to = "position") %>% 
   mutate(slot = str_extract(slot, "\\d"))
+
+counts_fixed <- mini_listened_time_data %>%
+  separate(counts, into= c("c1","c2","c3","c4","c5"), sep = ",", remove = F) %>%
+  mutate( c1 = str_extract(c1, "\\d"),
+          c2 = str_extract(c2, "\\d"),
+          c3 = str_extract(c3, "\\d"),
+          c4 = str_extract(c4, "\\d"),
+          c5 = str_extract(c5, '\\d')
+    )
+
+counts_long <- counts_fixed %>%
+  select(filename, subj, month, c1:c5) %>%
+  pivot_longer(cols = c1:c5, names_to = 'slot', values_to = 'counts') %>%
+  mutate(slot = str_extract(slot, '\\d'))
+
   
 voila <- left_join(ranks_long, positions_long)
 #eb: double check that this does the right thing by looking at wide & long versions manually

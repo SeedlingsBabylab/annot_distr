@@ -6,6 +6,7 @@ from settings import *
 #     Compute the total listen time. Several transformations or filterings are done before computing the total listen time.
 # '''
 def total_listen_time(cf, region_map, subregions, month67 = False):
+    counts = [0 for i in range(5)]
     # '''
     # Subruotine 1:
     #     Remove all the regions that are completely nested within the skip regions.
@@ -89,8 +90,8 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 if annot:
                     remove = False
                     count += 1
-
-                    
+            print(count)
+            counts[i] = count
             if remove:
                 print('Remove!')
                 print("no annot", subregion_start_times[i])
@@ -305,6 +306,8 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
     result['surplus_time'] = surplus_time
     result['num_surplus_region'] = num_surplus_region
     result['surplus_time_hour'] = ms2hr(surplus_time)
+
+    result['counts'] = counts
 
     print(subregion_time, skip_time, silence_time)
 
