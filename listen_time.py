@@ -254,7 +254,21 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
             total_time += end_times[i] - start_times[i]
         return total_time, len(start_times)
 
+    def count_sr_annotations():
+        subregion_start_times = region_map['subregion']['starts']
+        subregion_end_times = region_map['subregion']['ends']
+        for i in range(len(subregion_start_times)-1, -1, -1):
+            lines = cf.get_within_time(begin=subregion_start_times[i], end=subregion_end_times[i]).line_map
+            # Hacky way to count the number of annotations in the subregion.
+            count = 0
+            for line in lines:
+                annot = code_regx.findall(line.line)
+                if annot:
+                    count += 1
+            counts[i] = count
+            
     result = {}
+
 
     # Here we add the raw totals for skip and subregion to the result dictionary. By raw, we mean that the preprocessing steps below are not done. These items are for diagnostic purposes. 
 
