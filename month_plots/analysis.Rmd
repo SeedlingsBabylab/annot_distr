@@ -234,7 +234,7 @@ voila <- positions_long %>%
 # mini_listened_time_data %>% dplyr::select(filename, ranks, positions)
 #eb: as long as this does the right thing when you add the 5th SR, should be good!
 ```
-Below, we gather the subregion positions, ranks and number of annotations in each subregion for each file in the problem files list above. Similar to the analysis above, we divide into 8-13 and 14-17 month groups. 
+Below, we gather the subregion positions, ranks and number of annotations in each subregion for each file in the problem files list above. There is also information in the last column about the reasons for removing the subregion (NA means the subregion is not removed from the final listened time summary). Similar to the analysis above, we divide into 8-13 and 14-17 month groups. 
 ```{r Problem analysis}
 final <- 
   voila %>%
