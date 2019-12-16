@@ -164,7 +164,7 @@ Below, is a table of subregion positions and ranks for each file.
 # just showing you how i'd do it for the version of the data that's there now
 #that's why p5 and r5 are all NA--they wont' be with the right data form
 mini_listened_time_data <- listened_time_with_months %>% 
-  dplyr::select(filename, subj, month, subregions, positions, ranks, counts)
+  dplyr::select(filename, subj, month, subregions, positions, ranks, counts, removals)
 
 ranks_fixed <- mini_listened_time_data %>% 
   separate(ranks,  into= c("r1","r2","r3","r4","r5"), sep = "', '", remove = F) %>% 
@@ -207,10 +207,27 @@ counts_long <- counts_fixed %>%
   pivot_longer(cols = c1:c5, names_to = 'slot', values_to = 'counts') %>%
   mutate(slot = str_extract(slot, '\\d'))
 
+removals_fixed <- mini_listened_time_data %>%
+  separate(removals, into= c('re1', 're2', 're3', 're4', 're5'), sep = "', '", remove = FALSE) %>%
+  mutate(
+    re1 = str_extract(re1, "[A-Za-z\\s]+"),
+    re2 = str_extract(re2, "[A-Za-z\\s]+"),
+    re3 = str_extract(re3, "[A-Za-z\\s]+"),
+    re4 = str_extract(re4, "[A-Za-z\\s]+"),
+    re5 = str_extract(re5, "[A-Za-z\\s]+")
+  )
+
+removals_long <- removals_fixed %>%
+  select(filename, subj, month, re1:re5) %>%
+  pivot_longer(cols = re1:re5, names_to = 'slot', values_to = 'removals') %>%
+  mutate(slot = str_extract(slot, '\\d'))
+  
+
   
 voila <- positions_long %>%
   left_join(ranks_long) %>%
-  left_join(counts_long)
+  left_join(counts_long) %>%
+  left_join(removals_long)
 #eb: double check that this does the right thing by looking at wide & long versions manually
 
 
