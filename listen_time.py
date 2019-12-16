@@ -6,6 +6,8 @@ from settings import *
 #     Compute the total listen time. Several transformations or filterings are done before computing the total listen time.
 # '''
 def total_listen_time(cf, region_map, subregions, month67 = False):
+    sub_positions = range(1, 6)
+    removals = ['' for i in range(5)]
     counts = [0 for i in range(5)]
     # '''
     # Subruotine 1:
@@ -30,6 +32,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                         del region_start_times[j]
                         if region_type == 'subregion':
                             #del subregions[j]
+                            removals[i] = 'Subregion removed for being nested in skip!'
                             print('')
                     elif skip_start_times[i]<=region_start_times[j] and skip_end_times[i]<=region_end_times[j] and skip_end_times[i] >= region_start_times[j]:
                         skip_start_times[i] = region_start_times[j]
@@ -70,6 +73,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
                 #del subregions[i]
+                removals[i] = 'Subregion removed for having a nested makeup or surplus region'
         #print(subregion_start_times)
 
     # '''
@@ -83,21 +87,18 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
         for i in range(len(subregion_start_times)-1, -1, -1):
             remove = True
             lines = cf.get_within_time(begin=subregion_start_times[i], end=subregion_end_times[i]).line_map
-            # Hacky way to count the number of annotations in the subregion.
-            count = 0
             for line in lines:
                 annot = code_regx.findall(line.line)
                 if annot:
                     remove = False
-                    count += 1
-            print(count)
-            counts[i] = count
+                    break
             if remove:
                 print('Remove!')
-                print("no annot", subregion_start_times[i])
+                print("no annot in subregion # {}, starting at {}".format(i, subregion_start_times[i]))
                 del subregion_start_times[i]
                 del subregion_end_times[i]
                 #del subregions[i]
+                removals[i] = 'Subregion removed for not having any annotations'
         #print(subregion_start_times)
 
     # '''
@@ -127,6 +128,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 del subregion_start_times[i]
                 del subregion_end_times[i]
                 del subregion[i]
+                removals[i] = 'Subregion removed for being nested inside a silent or surplus region.'
         #print(subregion_start_times)
 
     # '''
@@ -182,6 +184,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                 print("overlap surplus ",subregion_start_times[i], subregion_end_times[i])
                 del subregion_start_times[i]
                 del subregion_end_times[i]
+                removals[i] = 'Subregion removed for overlapping with surplus'
                 #del subregions[i]
 
     def skip_silence_overlap_time():
@@ -278,6 +281,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
 
     if not month67:
         # Preprocessing
+        count_sr_annotations()
         remove_subregions_with_surplus()
         remove_regions_nested_in_skip()
         remove_subregions_with_nested_makeup()
@@ -322,6 +326,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
     result['surplus_time_hour'] = ms2hr(surplus_time)
 
     result['counts'] = counts
+    result['removals'] = removals
 
     print(subregion_time, skip_time, silence_time)
 
