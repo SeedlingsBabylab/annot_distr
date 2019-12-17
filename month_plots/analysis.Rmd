@@ -253,3 +253,9 @@ knitr::kable(t1, caption = 'Subregion summary for months 8 to 13') %>%
 knitr::kable(t2, caption = 'Subregion summary for months 14 to 17') %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
+
+The entire corpus:
+``` {r final table}
+knitr::kable(final, caption = 'Subregion summary for the entire corpus') %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+```
