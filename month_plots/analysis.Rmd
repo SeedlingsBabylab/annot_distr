@@ -404,3 +404,10 @@ The entire 8-17 month set of files in the corpus can be printed by uncommenting 
 # knitr::kable(final, caption = 'Subregion summary for the entire corpus') %>%
 #       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
+
+## Counts inside and outside subregions:
+
+Below is a summary of annotation counts inside subregions by position. Some things to take note of:
+- The numbered variables indicate number of annotations inside that subregion, **without removing the subregion for any reason**. 
+- The total, similarly, is the sum of all annotations in a file. 
+- outside variable is represents the number of annotations that are not in a subregion, makeup region, or an extra region (surplus is not considered as of now).
