@@ -1,0 +1,20 @@
+subregion starts   2000
+subregion ends   3600070
+silence starts   8929670
+silence ends   13184520
+silence starts   13312050
+silence ends   13499540
+silence starts   14271620
+silence ends   18284710
+subregion starts   19509010
+subregion ends   23100220
+subregion starts   26101490
+subregion ends   29700600
+silence starts   29899200
+silence ends   33453800
+subregion starts   34200800
+subregion ends   37803840
+subregion starts   37805070
+subregion ends   41400000
+
+

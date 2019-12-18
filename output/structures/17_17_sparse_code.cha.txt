@@ -1,0 +1,16 @@
+subregion starts   1200440
+subregion ends   4801140
+subregion starts   4801970
+subregion ends   8400430
+silence starts   17036250
+silence ends   22485700
+subregion starts   26100640
+subregion ends   29702720
+subregion starts   32700750
+subregion ends   36300430
+subregion starts   36302300
+silence starts   39182580
+subregion ends   40021890
+silence ends   57599990
+
+

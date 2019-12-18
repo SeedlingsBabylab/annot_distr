@@ -1,0 +1,24 @@
+subregion starts   900630
+makeup starts   900630
+makeup ends   1799760
+subregion ends   4502400
+subregion starts   8702200
+skip starts   8702200
+skip ends   9599020
+subregion ends   12300510
+silence starts   16473320
+silence ends   17872920
+subregion starts   20699140
+skip starts   24123780
+silence starts   24123780
+skip ends   24290330
+subregion ends   24307000
+silence ends   25609830
+subregion starts   32400880
+subregion ends   36002440
+subregion starts   38400480
+subregion ends   42001930
+silence starts   42188030
+silence ends   57599990
+
+

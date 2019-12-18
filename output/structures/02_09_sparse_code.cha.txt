@@ -1,0 +1,24 @@
+subregion starts   2701810
+subregion ends   6308230
+silence starts   6429050
+silence ends   8933910
+subregion starts   9300010
+subregion ends   12901430
+extra starts   14142070
+extra ends   15597290
+subregion starts   15600550
+subregion ends   19200310
+extra starts   20142510
+extra ends   21521020
+silence starts   23486150
+silence ends   31260050
+subregion starts   32702020
+subregion ends   36300000
+subregion starts   36300000
+subregion ends   39900270
+extra starts   39900940
+extra ends   41451560
+silence starts   42813180
+silence ends   57599990
+
+

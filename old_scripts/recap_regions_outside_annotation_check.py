@@ -21,6 +21,18 @@ code_regx = re.compile(r'([a-zA-Z][a-z+]*)( +)(&=)([A-Za-z]{1})(_)([A-Za-z]{1})(
 keyword_list = ["subregion", "silence", "skip", "makeup", "extra"]
 keyword_rank = {"subregion": 1, "skip": 2, "silence": 3, "makeup": 4, "extra": 5}
 
+FIELD_NAMES = [
+        'filename',
+        1,
+        2,
+        3,
+        4,
+        5,
+        'total',
+        'outside'
+        ]
+        
+
 def pull_regions(path):
     cf = pc.ClanFile(path)
 
@@ -108,6 +120,10 @@ def outside_annotation_check(cf, region_map):
 
         This assumption needs to be verified
     '''
+    counts_by_region = {i: 0 for i in range(1, 6)}
+    subregion_starts = list(region_map['subregion']['starts'])
+    subregion_ends = list(region_map['subregion']['ends'])
+
     def remove_subregions_with_nested_makeup():
         subregion_start_times = region_map['subregion']['starts']
         subregion_end_times = region_map['subregion']['ends']
@@ -147,28 +163,43 @@ def outside_annotation_check(cf, region_map):
                 return True
         return False
 
+    def is_inside_unremoved_subregion(offset):
+        for i in range(len(subregion_starts)):
+            if offset>=subregion_starts[i] and offset<=subregion_ends[i]:
+                return i + 1
+        return 0
+
     remove_subregions_with_nested_makeup()
     annotations = cf.annotations()
     conditions = [is_inside_extra_region, is_inside_makeup_region, is_inside_subregion]
     outside_annots = []
+    j = 0
     for annot in annotations:
+        # cond is True (or a positive subregion position) if an annotation is inside an unremoved subregion
+        cond = is_inside_unremoved_subregion(annot.offset)
         if not logical_or(annot.offset, conditions):
             outside_annots.append(annot)
-    return outside_annots
+        elif cond:
+            counts_by_region[cond] += 1
+            
+    
+    return outside_annots, counts_by_region, len(annotations)
             
 
 if __name__ == "__main__":
-    cha_dir = sys.argv[1]
-    files = sorted([os.path.join(cha_dir, x) for x in os.listdir(cha_dir) if x.endswith(".cha")])
+    path_file = sys.argv[1]
+    with open(path_file) as pf:
+        files = [l.strip() for l in pf.readlines()]
     #files = ['../all_cha/15_14_sparse_code.cha']
     file_with_error = []
     outside_annotations_f = open('../output/outside_annots.txt', 'w')
+    counts_sum = []
     for file in files:
         print("Checking {}".format(os.path.basename(file)))
         sequence, cf = pull_regions(file)
         sequence_minimal_error_sorting(sequence)
         error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
-        with open('../output/'+os.path.basename(file)+'.txt', 'w') as f:
+        with open('../output/structures/'+os.path.basename(file)+'.txt', 'w') as f:
             f.write('\n'.join([x[0] + '   ' + str(x[1]) for x in sequence]))
             f.write('\n')
             f.write('\n')
@@ -178,14 +209,26 @@ if __name__ == "__main__":
             print(bcolors.WARNING + "Finished {}".format(os.path.basename(file)) + bcolors.ENDC)
             file_with_error.append((os.path.basename(file), error_list))
         else:
-            outside_annots = outside_annotation_check(cf, region_map)
+            # Outside annots.txt file is outputted here.
+            outside_annots, counts_by_region, total = outside_annotation_check(cf, region_map)
+            counts_by_region['outside'] = len(outside_annots)
+            counts_by_region['total'] = total
+            counts_by_region['filename'] = os.path.basename(file)
+            counts_sum.append(counts_by_region)
+            # Check if file is month 8-17
             if outside_annots and int(os.path.basename(file)[3:5])>=8:
                 outside_annotations_f.write(os.path.basename(file)+'\n')
+                outside_annotations_f.write('Total: {}'.format(total))
                 for annot in outside_annots:
                     outside_annotations_f.write('\t\t\t\t' + annot.__repr__() + '\t\t' + str(annot.offset)+'\n')
                 outside_annotations_f.write('\n')
             print("Finished {}".format(os.path.basename(file)))
     outside_annotations_f.close()
+    with open('../output/counts_by_region.csv', 'wb') as csvf:
+        writer = csv.DictWriter(csvf, fieldnames=FIELD_NAMES)
+        writer.writeheader()
+        writer.writerows(counts_sum)
+        
     with open('../output/summary.txt', 'w') as f:
         for entry in file_with_error:
             f.write(entry[0]+'\n')

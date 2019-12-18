@@ -1,0 +1,20 @@
+subregion starts   1500420
+subregion ends   5100170
+subregion starts   5101090
+subregion ends   8700320
+subregion starts   18301740
+makeup starts   18301740
+makeup ends   19170030
+subregion ends   21900500
+silence starts   24405340
+silence ends   27548690
+subregion starts   33600260
+skip starts   35257610
+skip ends   36121360
+subregion ends   37200040
+subregion starts   37200840
+subregion ends   40800200
+silence starts   40852470
+silence ends   45346240
+
+
