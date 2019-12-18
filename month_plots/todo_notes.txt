@@ -1,0 +1,13 @@
+##listened time notes/TODOs for mtg with sarp
+
+* definitions at the top
+* should rename skips in month 6 and 7 as something else? e.g. sixsev_skip?
+* link to script that implements counting rules for 8-13
+* my guess is some of the ‘missing’ time might be within skips given that “* Any region of any type completely nested within a skip is removed.“ but i guess we'll have to see 
+* adding subregions to 06 and 07 (not urgent but need to do it)
+* why is repo 2 months old on github/BergelsonLab/annot_distr?
+* doublecheck 45_10 and 21_14 audio .wav length; should be < 6hours
+* missing rank info in 141 SRs across 30 files-> need to fix
+
+Once all that's squared away we can proceed with manual checks of potentially problematic files
+
