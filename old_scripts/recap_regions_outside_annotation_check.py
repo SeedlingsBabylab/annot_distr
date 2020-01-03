@@ -120,6 +120,7 @@ def outside_annotation_check(cf, region_map):
 
         This assumption needs to be verified
     '''
+    counts = {'extra', 'makeup', 'subregion', 'subregion_raw'}
     counts_by_region = {i: 0 for i in range(1, 6)}
     subregion_starts = list(region_map['subregion']['starts'])
     subregion_ends = list(region_map['subregion']['ends'])
@@ -175,7 +176,7 @@ def outside_annotation_check(cf, region_map):
     outside_annots = []
     j = 0
     for annot in annotations:
-        # cond is True (or a positive subregion position) if an annotation is inside an unremoved subregion
+        # cond is True (more precisely a positive subregion position) if an annotation is inside an unremoved subregion
         cond = is_inside_unremoved_subregion(annot.offset)
         if not logical_or(annot.offset, conditions):
             outside_annots.append(annot)
@@ -183,7 +184,7 @@ def outside_annotation_check(cf, region_map):
             counts_by_region[cond] += 1
             
     
-    return outside_annots, counts_by_region, len(annotations)
+    return outside_annots
             
 
 if __name__ == "__main__":

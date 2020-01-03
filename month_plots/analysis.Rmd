@@ -327,7 +327,6 @@ voila <- positions_long %>%
   left_join(ranks_long) %>%
   left_join(counts_long) %>%
   left_join(removals_long)
-#eb: double check that this does the right thing by looking at wide & long versions manually
 
 ```
 
@@ -405,9 +404,24 @@ The entire 8-17 month set of files in the corpus can be printed by uncommenting 
 #       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
 
-## Counts inside and outside subregions:
+## Outside annotation counts:
 
-Below is a summary of annotation counts inside subregions by position. Some things to take note of:
+Below is a summary of annotation counts inside subregions by position. Months 6 and 7 are removed as usual since they do not contain any any subregions. Some things to take note of:
 - The numbered variables indicate number of annotations inside that subregion, **without removing the subregion for any reason**. 
 - The total, similarly, is the sum of all annotations in a file. 
-- outside variable is represents the number of annotations that are not in a subregion, makeup region, or an extra region (surplus is not considered as of now).
+- outside variable is the number of annotations that are not in a subregion, makeup region, or an extra region (surplus is not considered as of now). Note that if a makeup region is nested inside a given subregion, we remove that subregion, hence any annotations inside that subregion **not inside the makeup region** are considered outside.
+- The **inside** variable added via mutate is the total number of annotations that are considered inside in contrast to annotations outside as defined above. It is defined as total number of annotations minus outside annotations. As a sanity check, there are no files with negative number of inside annotations.   
+
+
+```{r subregion counts, message= F, warning= F}
+counts_by_region <- 
+  read_csv('../output/counts_by_region.csv') %>%
+  separate(filename, into = c("subj","month"), sep = "_", extra="drop",remove=F) %>%
+  filter(!(month %in% c("06", "07"))) %>%
+  mutate(inside = total - outside)
+
+counts_by_region %>%
+knitr::kable(caption = 'Subregion summary for the entire corpus') %>%
+       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+
+```
