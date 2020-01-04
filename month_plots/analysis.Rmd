@@ -425,3 +425,16 @@ knitr::kable(caption = 'Subregion summary for the entire corpus') %>%
        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 
 ```
+
+
+## Timeline Data
+
+Below, we read in the timeline data:
+```{r timeline, message = F}
+timeline <- read_csv('../output/timeline_data.csv')
+
+timeline %>%
+knitr::kable(caption = 'Subregion summary for the entire corpus') %>%
+       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+
+```
