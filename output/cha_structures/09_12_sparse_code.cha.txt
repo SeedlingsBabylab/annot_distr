@@ -32,7 +32,7 @@ silence ends   57599990
 
 
 Position: 1, Rank: 2
-Position: 2, Rank: N/A
-Position: 3, Rank: N/A
-Position: 4, Rank: N/A
-Position: 5, Rank: N/A
+Position: 2, Rank: 5
+Position: 3, Rank: 3
+Position: 4, Rank: 4
+Position: 5, Rank: 1

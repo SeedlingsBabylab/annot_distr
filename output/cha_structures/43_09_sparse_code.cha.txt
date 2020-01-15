@@ -1,4 +1,4 @@
-subregion starts   1
+subregion starts   1000
 silence starts   2571510
 silence ends   2653040
 subregion ends   3600000
@@ -33,8 +33,8 @@ silence ends   56998860
 
 
 
-Position: 1, Rank: N/A
-Position: 2, Rank: N/A
-Position: 3, Rank: N/A
-Position: 4, Rank: N/A
-Position: 5, Rank: N/A
+Position: 1, Rank: 1
+Position: 2, Rank: 2
+Position: 3, Rank: 5
+Position: 4, Rank: 3
+Position: 5, Rank: 4
