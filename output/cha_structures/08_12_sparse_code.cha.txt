@@ -1,5 +1,5 @@
-subregion starts   1
 makeup starts   980
+subregion starts   1000
 makeup ends   601120
 subregion ends   3600000
 subregion starts   8400000
@@ -21,8 +21,8 @@ silence ends   57599990
 
 
 
-Position: 1, Rank: N/A
-Position: 2, Rank: N/A
-Position: 3, Rank: N/A
-Position: 4, Rank: N/A
-Position: 5, Rank: N/A
+Position: 1, Rank: 5
+Position: 2, Rank: 1
+Position: 3, Rank: 3
+Position: 4, Rank: 2
+Position: 5, Rank: 4

@@ -52,3 +52,6 @@ vignettes/*.pdf
 
 # Vim and Libreoffice temp files
 *\#
+
+#Just a general folder with things to ignore
+ignore/
