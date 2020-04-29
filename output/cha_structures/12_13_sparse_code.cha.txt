@@ -15,6 +15,8 @@ subregion ends   25500000
 subregion starts   26400000
 subregion ends   30000000
 subregion starts   30600000
+makeup starts   30601650
+makeup ends   30893970
 subregion ends   34200000
 silence starts   44386230
 silence ends   44410930

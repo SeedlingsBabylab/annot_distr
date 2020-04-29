@@ -21,8 +21,8 @@ makeup starts   40200000
 makeup ends   42596800
 subregion starts   43800000
 subregion ends   43800000
+silence starts   47400000
 subregion ends   47400000
-silence starts   47481880
 silence ends   57599990
 
 
