@@ -1,3 +1,7 @@
+### To view the analysis of current data:
+
+Simply open the monthplots/monthplots.Rproj in Rstudio, and knit. 
+
 ### recap_regions.py
 This script outputs csv files specifying different regions of all cha files in the input directory. recap_regions.csv is the output csv, regions_issue.csv is the file for errors.  
 ```
