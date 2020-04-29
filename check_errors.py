@@ -18,9 +18,7 @@ def sequence_missing_repetition_entry_alert(sequence):
     for entry in sequence:
         region_map[entry[0].split()[0]][entry[0].split()[1]].append(entry[1])
     for item in keyword_list:
-        if len(region_map[item]['starts']) == 0:
-            continue
-        if len(region_map[item]['ends']) == 0:
+        if len(region_map[item]['starts']) == 0 and len(region_map[item]['ends']) == 0:
             continue
         # Checking for duplicate starts and ends. Length of set will be shorter if there are duplicates.
         if len(set(region_map[item]['ends'])) < len(region_map[item]['ends']):
@@ -46,7 +44,7 @@ def sequence_missing_repetition_entry_alert(sequence):
                 error_list.append(item + ' starts missing for end at ' + str(end_list[j]))
                 j += 1
         if i<len(start_list):
-            error_list.extend([item + 'ends missing for start at ' + str(start_list[s]) for s in range(i, len(start_list))])
+            error_list.extend([item + ' ends missing for start at ' + str(start_list[s]) for s in range(i, len(start_list))])
         if j<len(end_list):
             error_list.extend([item + 'starts missing for end at ' + str(end_list[s]) for s in range(i, len(start_list))])
     return error_list, region_map
