@@ -89,7 +89,7 @@ knitr::kable(
 ```
 
 
-Below is a short section of the format of the csv file with only the **hour variables**. This should help with quick sanity checks. Note that for months 6 and 7, total listen time is calculated by subtracting skip and silence times from the last available time stamp in a file. 
+Below is a short section of the format of the csv file with only the **hour variables**. This should help with quick sanity checks. Note that for months 6 and 7, total listen time is calculated by subtracting skip and silence times from the last available time stamp in a file. **These files are not listed here because they are problematic!** 
 ```{r mutated, echo=FALSE}
 knitr::kable(
   listened_time_with_months[1:5,] %>% select(filename, ends_with("hour")),
@@ -99,11 +99,17 @@ knitr::kable(
 ```
 
 ## Listen Time Histograms 
-Below are the histograms for each month. 
+Below are the histograms for each month.
+
+<details><summary>Click for month by month histograms</summary>
+<div>
 ```{r histograms, out.width="%25"}
 ggplot(data = listened_time_with_months) + geom_histogram(mapping = aes(x = total_listen_time_hour),binwidth=.25) + facet_wrap(~ month, scales = "free") +
   labs(x = "Total listened time in hours", y = "Number of files")
 ```
+
+</div>
+</details>
 
 ## Problem File List
 Please find below additional analysis and listings of possibly problematics files.
@@ -121,7 +127,8 @@ $$total\_listen\_time\_hour = end\_time\_hour - (skip\_time\_hour + silence\_tim
 According to this calculation, the files below are listed as **potentially problematic** since their total listen time is either >12 hours (unlikely for infants this age to be awake that much) or <8 hours (should double check for any errors in the file since that's <50% of full recording capacity).  Note the silence_raw_hour variable here will be the same as the silence_time_hour variable. 
 That is, for months 6 and 7, silent and skip regions are **not modified**, hence we do not include their raw versions (instead we calculate their overlap, which is not done for the rest of the months). 
 
-
+<details><summary>Click for months 6-7 problematic files</summary>
+<div>
 ```{r sixseven, message=FALSE}
 headers <- c(
   "filename", 
@@ -142,6 +149,8 @@ sixseven_summary <-
 knitr::kable(sixseven_summary) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 ```
+</div>
+</details>
 
 As we can see above, n = `r count(sixseven_summary %>% filter(total_listen_time_hour>12))` files have >12 hours, and n = `r count(sixseven_summary %>% filter(total_listen_time_hour<8))` have <8 hours.
 
@@ -398,11 +407,12 @@ final %>%
 ```
 
 
-The entire 8-17 month set of files in the corpus can be printed by uncommenting below
+<details><summary>Click here to view the subregion summary for the entire 8-17 month set of files in the corpus.</summary>
 ``` {r final table}
-# knitr::kable(final, caption = 'Subregion summary for the entire corpus') %>%
-#       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
+knitr::kable(final, caption = 'Subregion summary for the entire corpus') %>%
+       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
+</details>
 
 ## Outside annotation counts:
 

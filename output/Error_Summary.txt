@@ -1,9 +1,0 @@
-15_09_sparse_code.cha
-				Found a nesting! makeup end at 1339940 is nested between makeup start at 34120 and makeup end at 3599340
-
-23_14_sparse_code.cha
-				extra ends missing for start at 33000830
-
-42_13_sparse_code.cha
-				silence ends missing for start at 15433250
-

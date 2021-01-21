@@ -1,6 +1,13 @@
 from funcs import ms2hr
 from settings import *
 
+
+def find_nested_skip(skip_regions, subregion_start, subregion_end):
+    for i, item in enumerate(skip_regions):
+        if item['starts'] >= subregion_start and item['ends'] <= subregion_end:
+            return i
+
+
 # '''
 # Step 4:
 #     Compute the total listen time. Several transformations or filterings are done before computing the total listen time.
@@ -86,6 +93,10 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
     def remove_subregions_without_annotations():
         subregion_start_times = region_map['subregion']['starts']
         subregion_end_times = region_map['subregion']['ends']
+
+        skip_start_times = region_map['skip']['starts']
+        skip_end_times = region_map['skip']['ends']
+
         for i in range(len(subregion_start_times)-1, -1, -1):
             remove = True
             lines = cf.get_within_time(begin=subregion_start_times[i], end=subregion_end_times[i]).line_map
@@ -95,6 +106,10 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = False
                     break
             if remove:
+                skip_regions = [{'starts':i, 'ends':j} for i, j in zip(region_map['skip']['starts'], region_map['skip']['ends'])]
+                subregion_start = subregion_start_times[i]
+                subregion_end = subregion_end_times[i]
+                find_nested_skip(skip_regions, subregion_start, subregion_end)
                 print('Remove!')
                 print("no annot in subregion # {}, starting at {}".format(sub_positions[i], subregion_start_times[i]))
                 update_sub_pos('Subregion removed for not having any annotations', i)
