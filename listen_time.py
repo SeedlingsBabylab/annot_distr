@@ -106,7 +106,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
                     remove = False
                     break
             if remove:
-                skip_regions = [{'starts':i, 'ends':j} for i, j in zip(region_map['skip']['starts'], region_map['skip']['ends'])]
+                skip_regions = [{'starts':_i, 'ends':_j} for _i, _j in zip(region_map['skip']['starts'], region_map['skip']['ends'])]
                 subregion_start = subregion_start_times[i]
                 subregion_end = subregion_end_times[i]
                 find_nested_skip(skip_regions, subregion_start, subregion_end)
