@@ -5,10 +5,10 @@ silence ends   8933910
 subregion starts   9300000
 subregion ends   12900000
 extra starts   14142070
-extra ends   15597290
+surplus ends   15597290
 subregion starts   15600000
 subregion ends   19200000
-extra starts   20142510
+surplus starts   20142510
 extra ends   21521020
 silence starts   23486150
 silence ends   31260050
@@ -22,9 +22,5 @@ silence starts   42813180
 silence ends   57599990
 
 
-
-Position: 1, Rank: 2
-Position: 2, Rank: 5
-Position: 3, Rank: 4
-Position: 4, Rank: 3
-Position: 5, Rank: 1
+surplus starts missing for end at 15597290
+surplus ends missing for start at 20142510

@@ -20,8 +20,8 @@ silence starts   25665590
 silence ends   30982550
 subregion starts   32400000
 subregion ends   36000000
-extra starts   36000860
-extra ends   37530220
+surplus starts   36000860
+surplus ends   37530220
 subregion starts   39900000
 makeup starts   39904370
 subregion ends   43500000
