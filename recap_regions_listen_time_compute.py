@@ -47,11 +47,14 @@ def process_single_file(file, file_path=cha_structure_path):
             if 'missing' in item:
                 return
 
-        # Checking if the file is a 6 or 7 month old to set the month67 parameter of the function
-        if os.path.basename(file)[3:5] in ['06', '07']:
-            listen_time = total_listen_time(cf, region_map, subregions, month67 = True)
-        else:
-            listen_time = total_listen_time(cf, region_map, subregions)
+        try:
+            # Checking if the file is a 6 or 7 month old to set the month67 parameter of the function
+            if os.path.basename(file)[3:5] in ['06', '07']:
+                listen_time = total_listen_time(cf, region_map, subregions, month67 = True)
+            else:
+                listen_time = total_listen_time(cf, region_map, subregions)
+        except:
+            return
 
         f.write('\n')
         f.write('\n'.join(subregions))
@@ -77,9 +80,6 @@ def process_single_file(file, file_path=cha_structure_path):
         listen_time_summary.append(listen_time)
         print("Finished {}".format(os.path.basename(file)) + '\nTotal Listen Time: ' + bcolors.OKGREEN + str(listen_time['total_listen_time_hour'])+bcolors.ENDC)
         print subregions
-
-#def pos_ranks(subs):
-
 
 if __name__ == "__main__":
     args = get_args()
@@ -134,8 +134,11 @@ if __name__ == "__main__":
             listen_time_summary = []
 
             for file in files:
-                process_single_file(file, cha_structure_path)
-            
+                try:
+                    process_single_file(file, cha_structure_path)
+                except e:
+                    print(e)
+                    continue
         # We output the findings.
     output(file_with_error, listen_time_summary, args.output_path)
 

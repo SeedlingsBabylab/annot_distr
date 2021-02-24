@@ -89,7 +89,7 @@ knitr::kable(
 ```
 
 
-Below is a short section of the format of the csv file with only the **hour variables**. This should help with quick sanity checks. Note that for months 6 and 7, total listen time is calculated by subtracting skip and silence times from the last available time stamp in a file. **These files are not listed here because they are problematic!** 
+Below is a short section of the format of the csv file with only the **hour variables**. This should help with quick sanity checks. Note that for months 6 and 7, total listen time is calculated by subtracting skip and silence times from the last available time stamp in a file. **These files are not listed here because they are problematic! (As in there is nothing wrong with them, they are just displayed here as an example)** 
 ```{r mutated, echo=FALSE}
 knitr::kable(
   listened_time_with_months[1:5,] %>% select(filename, ends_with("hour")),
@@ -116,7 +116,7 @@ Please find below additional analysis and listings of possibly problematics file
 
 ## Month 6 and 7
 As a reminder: in month 6 and 7 'silence finder' process demarcated silences, and skips were marked to denote
-time that someone in the future probably needn't listen to at all (e.g. long carrides with a radio playing)
+time that someone in the future probably needn't listen to at all (e.g. long car rides with a radio playing)
 [in months 8-17 skips carried a different meaning, see below].
 
 There are `r count(listened_time_with_months %>% filter(month %in% c("06","07")))` 6 and 7 month files.
@@ -152,7 +152,7 @@ knitr::kable(sixseven_summary) %>%
 </div>
 </details>
 
-As we can see above, n = `r count(sixseven_summary %>% filter(total_listen_time_hour>12))` files have >12 hours, and n = `r count(sixseven_summary %>% filter(total_listen_time_hour<8))` have <8 hours.
+As we can see above, n = `r count(sixseven_summary %>% filter(total_listen_time_hour>12))` (calculated interactively) files have >12 hours, and n = `r count(sixseven_summary %>% filter(total_listen_time_hour<8))` (calculated interactively) have <8 hours.
 
 
 Alternatively,  we can assume that all skip time was technically **listened** to in the sense that it was part of the file and human coders checked manually that silences were really silent. 
@@ -179,7 +179,7 @@ knitr::kable(alternative) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 ```
 
-As seen in the table, above, `r count(alternative)` files are worth double checking for one of these cases.
+As seen in the table, above, `r count(alternative)` (interactively calculated) files are worth double checking for one of these cases.
 
 
 ## Month 8-17: Subregions and other types of regions.
@@ -200,14 +200,14 @@ Also note the raw variables, which are unmodified totals. So, for example, while
 
 Note:  `subregion_raw_hour` and `silence_raw_hour` are the totals of these types of regions without the removals according to the rules above.
 
-We separately display files with < 5 subregions written into the file. These should be double checked for audio recording length, as **potential concerns**
+We separately display files with < 5 subregions in the file. These should be double checked for audio recording length, as **potential concerns**
 
 ### month 8-13
 
 Assumed target length: 4 hours; listing **problematic** files that are <3.75 or >4.25
 
 First let's print out any files that don't have 5 subregions, and provide an overview
-```{r eight_to_thirteen}
+```{r eight_to_thirteen, message=FALSE}
 eight2thirteen <- 
   listened_time_with_months %>% 
   filter(month %in% c("08","09","10","11","12","13") & (total_listen_time_hour>4.25 | total_listen_time_hour<3.75 | num_raw_subregion<5)) %>%
@@ -217,24 +217,28 @@ eight2thirteen <-
 listened_time_with_months %>% 
    filter(month %in% c("08","09","10","11","12","13") & num_raw_subregion<5) %>% 
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
-  arrange(total_listen_time_hour)
+  arrange(total_listen_time_hour) %>%
+  knitr::kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 
 ```
 
-Out of `r count(listened_time_with_months %>% filter(month %in% c("08","09","10","11","12","13")))` recordings
+Out of `r count(listened_time_with_months %>% filter(month %in% c("08","09","10","11","12","13")))` (interactively calculated) recordings
 at 8-13 months, (one recording, 22_09 was never collected):
 
-`r count(eight2thirteen %>% filter(total_listen_time_hour>4.25))` are >4.25 &
-`r count(eight2thirteen %>% filter(total_listen_time_hour<3.75))` are <3.75 hours of listened time.
+`r count(eight2thirteen %>% filter(total_listen_time_hour>4.25))` (interactively calculated) are >4.25 &
+`r count(eight2thirteen %>% filter(total_listen_time_hour<3.75))` (interactively calculated) are <3.75 hours of listened time.
 
-Just one had < 5 subregions (`45_10` which was only 5.33 hours long)
+Just one had < 5 subregions (`45_10` which was only 5.33 hours long). Moving on to the problematic files:
 
-
+<details><summary>Click for months 8-13 problematic files</summary>
+<div>
 ```{r bigtable}
 knitr::kable(eight2thirteen, table.attr='class="bigTable"') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
-
+</div>
+</details>
 
 ### month 14-17
 For these months, the calculation is exactly the same as months 8-13, but it the target length is 3 hours. 
@@ -251,17 +255,21 @@ fourteen2seventeen <-
 listened_time_with_months %>% 
    filter(month %in% c("14","15","16","17") & num_raw_subregion<5) %>% 
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
-  arrange(total_listen_time_hour)
+  arrange(total_listen_time_hour) %>%
+  knitr::kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
+```
 
-
+Listing the potentially problematic files:
+```{r fourteen2seventeen}
 knitr::kable(fourteen2seventeen) %>%
       kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 ```
-Out of `r count(listened_time_with_months %>% filter(month %in% c("14","15","16","17")))` recordings
+Out of `r count(listened_time_with_months %>% filter(month %in% c("14","15","16","17")))` (interactively calculated) recordings
 at 14-17 months:
 
-`r count(fourteen2seventeen %>% filter(total_listen_time_hour>3.25))` are >3.25 &
-`r count(fourteen2seventeen %>% filter(total_listen_time_hour<2.75))` are <2.75 hours of listened time.
+`r count(fourteen2seventeen %>% filter(total_listen_time_hour>3.25))` (interactively calculated) are >3.25 &
+`r count(fourteen2seventeen %>% filter(total_listen_time_hour<2.75))` (interactively calculated) are <2.75 hours of listened time.
 
 Just one had < 5 subregions (`21_14` which was only 5.58 hours long)
 
@@ -341,7 +349,7 @@ voila <- positions_long %>%
 
 Let's first skim the result:
 
-```{r Problem analysis}
+```{r Problem analysis45}
 final <- 
   voila %>%
   filter(!(month %in% c('06', '07'))) %>%
@@ -422,7 +430,8 @@ Below is a summary of annotation counts inside subregions by position. Months 6 
 - outside variable is the number of annotations that are not in a subregion, makeup region, or an extra region (surplus is not considered as of now). Note that if a makeup region is nested inside a given subregion, we remove that subregion, hence any annotations inside that subregion **not inside the makeup region** are considered outside.
 - The **inside** variable added via mutate is the total number of annotations that are considered inside in contrast to annotations outside as defined above. It is defined as total number of annotations minus outside annotations. As a sanity check, there are no files with negative number of inside annotations.   
 
-
+<details><summary>Annotation counts for the entire corpus</summary>
+<div>
 ```{r subregion counts, message= F, warning= F}
 counts_by_region <- 
   read_csv('../output/counts_by_region.csv') %>%
@@ -431,20 +440,23 @@ counts_by_region <-
   mutate(inside = total - outside)
 
 counts_by_region %>%
-knitr::kable(caption = 'Subregion summary for the entire corpus') %>%
+knitr::kable(caption = 'Annotation counts by subregion for the entire corpus') %>%
        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 
 ```
-
+</div>
 
 ## Timeline Data
 
 Below, we read in the timeline data:
+<details><summary>Timeline summary for the entire corpus</summary>
+<div>
 ```{r timeline, message = F}
 timeline <- read_csv('../output/timeline_data.csv')
 
 timeline %>%
-knitr::kable(caption = 'Subregion summary for the entire corpus') %>%
+knitr::kable(caption = 'Timeline summary for the entire corpus') %>%
        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T, position="left")
 
 ```
+</div>

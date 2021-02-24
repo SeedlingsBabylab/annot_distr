@@ -5,6 +5,8 @@ subregion ends   4800000
 subregion starts   8700000
 subregion ends   12300000
 subregion starts   12600000
+skip starts   14959720
+skip ends   15825000
 subregion ends   16200000
 subregion starts   16500000
 makeup starts   16503610
