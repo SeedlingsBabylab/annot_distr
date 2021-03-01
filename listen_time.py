@@ -311,7 +311,8 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
         remove_subregions_without_annotations()
         remove_subregions_nested_in_silence_regions()
         remove_silence_regions_outside_subregions()
-        result['skip_silence_overlap_hour'] = 0
+        skip_silence_time = skip_silence_overlap_time()
+        result['skip_silence_overlap_hour'] = ms2hr(skip_silence_time)
                       
     else:
         # Preprocessing
@@ -356,7 +357,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
 
     # If the file is not a 6 or 7 month file, we add/subtract regions to get total time.
     if not month67:
-        total_time = subregion_time + extra_time + makeup_time + surplus_time - silence_time - skip_time
+        total_time = subregion_time + extra_time + makeup_time + surplus_time - (skip_time + silence_time - skip_silence_time)
 
     # Otherwise, we assume that the entire file was listened to, so we do not touch anything. 
     else:

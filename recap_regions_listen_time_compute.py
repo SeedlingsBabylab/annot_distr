@@ -29,6 +29,8 @@ def process_single_file(file, file_path=cha_structure_path):
         print(bcolors.FAIL + "Error opening file: {}".format(file) + bcolors.ENDC)
         print sys.exc_info()
         return
+
+    # HINT: The sequence below is what gets written to the cha_structure file.
     sequence = sequence_minimal_error_sorting(sequence)
     error_list, region_map = sequence_missing_repetition_entry_alert(sequence)
     with open(os.path.join(file_path, os.path.basename(file)+'.txt'), 'w') as f:

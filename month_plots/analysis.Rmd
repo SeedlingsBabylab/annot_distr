@@ -240,6 +240,10 @@ knitr::kable(eight2thirteen, table.attr='class="bigTable"') %>%
 </div>
 </details>
 
+```{r}
+eight2thirteen %>% 
+  write_csv(file = "eight2thirteen_problem_files.csv")
+```
 ### month 14-17
 For these months, the calculation is exactly the same as months 8-13, but it the target length is 3 hours. 
 Assumed target length: 3 hours, listing >3.25 and <2.75 as **problematic**
