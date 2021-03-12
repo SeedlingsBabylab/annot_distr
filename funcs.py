@@ -105,7 +105,7 @@ def output(file_with_error, listen_time_summary, output_path):
 #     have the same timestamp, certain sorting order is still maintained.
 # '''
 def sequence_minimal_error_sorting(sequence):
-    sequence = sorted(sequence, key=lambda k: (k[1], keyword_rank[k[0]]))
+    sequence = sorted(sequence, key=lambda k: (k[1], starts_ends[k[0].split()[1]], keyword_rank[k[0]]))
     return sequence
 
 

@@ -7,6 +7,9 @@ def find_nested_skip(skip_regions, subregion_start, subregion_end):
         if item['starts'] >= subregion_start and item['ends'] <= subregion_end:
             return i
 
+def getOverlap(a, b):
+    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
+
 
 # '''
 # Step 4:
@@ -191,8 +194,9 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
             remove = False
             for j in range(len(surplus_start_times)):
                 # If surplus start or end is inside the subregion (e.g. there is any kind of overlap)
-                if (subregion_start_times[i]<=surplus_start_times[j] and subregion_end_times[i]>=surplus_start_times[j]) \
-                or (subregion_start_times[i]<=surplus_end_times[j] and subregion_end_times[i]>=surplus_end_times[j]):
+                sub = subregion_start_times[i], subregion_end_times[i]
+                surp = surplus_start_times[j], surplus_end_times[j]
+                if getOverlap(sub, surp):
                     remove = True
                     break
             if remove:
