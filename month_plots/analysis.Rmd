@@ -146,6 +146,8 @@ sixseven_summary <-
   mutate(calculation_of_listen_time_hour = sprintf("= %s - (%s + %s - %s)", end_time_hour, skip_time_hour, silence_time_hour, skip_silence_overlap_hour)) %>% 
   arrange(total_listen_time_hour)
 
+write_csv(sixseven_summary, 'sixseven_problems')
+
 knitr::kable(sixseven_summary) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
 ```
@@ -214,6 +216,8 @@ eight2thirteen <-
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
   arrange(total_listen_time_hour)
 
+write_csv(eight2thirteen, 'eight2thirteen_problems')
+
 listened_time_with_months %>% 
    filter(month %in% c("08","09","10","11","12","13") & num_raw_subregion<5) %>% 
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
@@ -256,6 +260,7 @@ fourteen2seventeen <-
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
   arrange(total_listen_time_hour)
 
+write_csv(fourteen2seventeen, 'fourteen2seventeen_problems')
 listened_time_with_months %>% 
    filter(month %in% c("14","15","16","17") & num_raw_subregion<5) %>% 
   select(filename, month, ends_with("hour"),  -skip_silence_overlap_hour, contains("raw")) %>% 
