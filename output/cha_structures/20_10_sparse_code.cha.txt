@@ -1,10 +1,10 @@
 subregion starts   300000
 makeup starts   343080
-surplus starts   954920
 makeup ends   954920
+surplus starts   954920
 surplus ends   3147340
-subregion starts   3900000
 subregion ends   3900000
+subregion starts   3900000
 silence starts   7205260
 subregion ends   7500000
 silence ends   13228080

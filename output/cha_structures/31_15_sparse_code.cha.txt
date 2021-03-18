@@ -1,6 +1,6 @@
 subregion starts   1000
-subregion starts   3600000
 subregion ends   3600000
+subregion starts   3600000
 subregion ends   7200000
 silence starts   7229080
 silence ends   10383430

@@ -5,10 +5,10 @@ skip ends   1469480
 skip starts   1524480
 skip ends   1755900
 skip starts   6107490
-silence starts   6968390
 skip ends   6968390
-skip starts   8701190
+silence starts   6968390
 silence ends   8701190
+skip starts   8701190
 skip ends   8714580
 skip starts   12725820
 skip ends   12794660
@@ -23,8 +23,8 @@ skip ends   15905930
 skip starts   15914610
 skip ends   16063660
 skip starts   16750860
-silence starts   17513570
 skip ends   17513570
+silence starts   17513570
 silence ends   19132040
 skip starts   19206590
 skip ends   19383730

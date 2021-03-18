@@ -13,8 +13,8 @@ silence ends   16929050
 subregion starts   18300000
 skip starts   18996820
 skip ends   19489970
-subregion starts   21900000
 subregion ends   21900000
+subregion starts   21900000
 subregion ends   25500000
 subregion starts   34200000
 subregion ends   37800000

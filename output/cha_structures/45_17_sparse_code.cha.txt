@@ -5,12 +5,12 @@ subregion ends   9300000
 silence starts   10301520
 subregion starts   22800000
 silence ends   24315700
-subregion starts   26400000
 subregion ends   26400000
+subregion starts   26400000
 makeup starts   26404150
 makeup ends   26473670
-subregion starts   30000000
 subregion ends   30000000
+subregion starts   30000000
 skip starts   33533230
 subregion ends   33600000
 skip ends   33600150

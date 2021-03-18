@@ -13,10 +13,10 @@ silence ends   24672430
 subregion starts   26100000
 makeup starts   26100440
 makeup ends   27043710
-subregion starts   29700000
 subregion ends   29700000
-subregion starts   33300000
+subregion starts   29700000
 subregion ends   33300000
+subregion starts   33300000
 silence starts   35946790
 skip starts   35947840
 skip ends   36722160

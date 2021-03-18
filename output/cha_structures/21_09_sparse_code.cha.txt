@@ -1,7 +1,7 @@
 subregion starts   1000
 skip starts   1101610
+skip ends   1699830
 silence starts   1813300
-skip ends   1813300
 subregion ends   3600000
 silence ends   11312130
 subregion starts   11700000

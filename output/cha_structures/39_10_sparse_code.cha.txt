@@ -1,6 +1,6 @@
 subregion starts   1800000
-subregion starts   5400000
 subregion ends   5400000
+subregion starts   5400000
 subregion ends   9000000
 subregion starts   24000000
 subregion ends   27600000

@@ -13,11 +13,11 @@ subregion ends   23700000
 extra starts   23746500
 extra ends   25134110
 subregion starts   25200000
-subregion starts   28800000
 subregion ends   28800000
+subregion starts   28800000
 skip starts   30779730
-silence starts   31603280
 skip ends   31603280
+silence starts   31603280
 subregion ends   32400000
 silence ends   34461770
 

@@ -6,11 +6,11 @@ skip ends   8099130
 subregion ends   8100000
 silence starts   8127950
 subregion starts   13500000
-skip starts   13721810
 silence ends   13721810
+skip starts   13721810
 skip ends   14208850
-subregion starts   17100000
 subregion ends   17100000
+subregion starts   17100000
 subregion ends   20700000
 subregion starts   24600000
 makeup starts   24749470

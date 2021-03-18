@@ -1,8 +1,8 @@
 subregion starts   1000
 subregion ends   3600000
 subregion starts   5700000
-subregion starts   9300000
 subregion ends   9300000
+subregion starts   9300000
 makeup starts   9301200
 makeup ends   10562020
 subregion ends   12900000

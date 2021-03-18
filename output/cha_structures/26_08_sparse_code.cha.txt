@@ -1,9 +1,9 @@
 silence starts   3879190
 subregion starts   9300000
-makeup starts   11396170
 silence ends   11396170
-subregion starts   12900000
+makeup starts   11396170
 subregion ends   12900000
+subregion starts   12900000
 makeup ends   12902090
 skip starts   13793600
 skip ends   14473010

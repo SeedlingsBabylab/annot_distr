@@ -6,8 +6,8 @@ makeup ends   2835400
 subregion ends   4800000
 subregion starts   6300000
 skip starts   9391340
-silence starts   9856460
 skip ends   9856460
+silence starts   9856460
 subregion ends   9900000
 silence ends   13079920
 subregion starts   13500000

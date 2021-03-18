@@ -1,6 +1,6 @@
 subregion starts   1000
-extra starts   3600000
 subregion ends   3600000
+extra starts   3600000
 extra ends   4033260
 subregion starts   6300000
 subregion ends   9900000
@@ -28,9 +28,9 @@ skip ends   25518890
 skip starts   25703370
 skip ends   25974880
 skip starts   26004590
-subregion starts   26100000
 skip ends   26100000
 subregion ends   26100000
+subregion starts   26100000
 makeup starts   27743030
 makeup ends   29700000
 subregion ends   29700000

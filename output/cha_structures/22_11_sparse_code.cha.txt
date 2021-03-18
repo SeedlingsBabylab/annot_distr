@@ -2,8 +2,8 @@ silence starts   400
 silence ends   1036010
 silence starts   2811060
 subregion starts   7200000
-makeup starts   7305580
 silence ends   7305580
+makeup starts   7305580
 makeup ends   8401410
 subregion ends   10800000
 subregion starts   20400000

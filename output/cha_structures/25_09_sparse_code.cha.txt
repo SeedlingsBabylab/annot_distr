@@ -1,6 +1,6 @@
 subregion starts   1000
-subregion starts   3600000
 subregion ends   3600000
+subregion starts   3600000
 makeup starts   3605730
 makeup ends   4624200
 subregion ends   7200000

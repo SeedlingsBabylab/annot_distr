@@ -2,9 +2,9 @@ subregion starts   2700000
 makeup starts   2700960
 skip starts   4830070
 skip ends   5519710
-extra starts   6300480
 makeup ends   6300480
 subregion ends   6300480
+extra starts   6300480
 extra ends   6424670
 silence starts   8805500
 subregion starts   10200000

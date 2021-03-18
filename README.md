@@ -1,3 +1,13 @@
+## INSTRUCTIONS TO RUN
+
+- Clone the repo: `git clone git@github.com:SeedlingsBabylab/annot_distr.git`
+- Also clone the paths repo: `git clone git@github.com:SeedlingsBabylab/path_files.git`
+- Create a virtualenv (the path is up to you, but for example, assuming you are in the newly cloned directory): `python3 -m venv env`.
+- Activate the virtualenv: `source env/bin/activate`
+- Install the requirements: `pip install -r requirements.txt`
+- Make sure you are connected to the network drives.
+- Using the `cha_sparse_code_paths.txt` file from the file paths repo you cloned, run this command: `python3 recap_regions_listen_time_compute.py <path_to_cha_sparse_code_paths.txt_file>`
+
 ### To view the analysis of current data:
 
 Simply open the monthplots/monthplots.Rproj in Rstudio, and knit. 

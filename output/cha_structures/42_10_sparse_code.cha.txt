@@ -7,8 +7,8 @@ subregion ends   5400000
 silence starts   5637730
 silence ends   5911990
 subregion starts   6600000
-subregion starts   10200000
 subregion ends   10200000
+subregion starts   10200000
 silence starts   13264940
 subregion ends   13800000
 subregion starts   23100000

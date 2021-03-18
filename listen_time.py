@@ -356,8 +356,7 @@ def total_listen_time(cf, region_map, subregions, month67 = False):
     result['counts'] = counts
     result['removals'] = removals
 
-    print(subregion_time, skip_time, silence_time)
-
+    print(['{}: {}'.format(k, v) for k, v in result.items() if k.endswith('hour')])
 
     # If the file is not a 6 or 7 month file, we add/subtract regions to get total time.
     if not month67:

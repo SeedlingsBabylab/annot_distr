@@ -1,8 +1,8 @@
 skip starts   3089870
 skip ends   3239910
 skip starts   3494940
-silence starts   3812810
 skip ends   3812810
+silence starts   3812810
 silence ends   5790300
 skip starts   8098120
 skip ends   8274640
@@ -15,8 +15,8 @@ skip ends   16662740
 silence starts   16664140
 silence ends   18377710
 skip starts   27318100
-silence starts   27635810
 skip ends   27635810
+silence starts   27635810
 silence ends   29174310
 silence starts   38701610
 silence ends   40053420

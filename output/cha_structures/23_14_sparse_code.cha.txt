@@ -1,8 +1,8 @@
 silence starts   98020
 silence ends   4668820
 subregion starts   5700000
-subregion starts   9300000
 subregion ends   9300000
+subregion starts   9300000
 subregion ends   12900000
 extra starts   12900430
 silence starts   13585980

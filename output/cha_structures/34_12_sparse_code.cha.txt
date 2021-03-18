@@ -1,14 +1,14 @@
 subregion starts   900000
-subregion starts   4500000
 subregion ends   4500000
+subregion starts   4500000
 silence starts   6623530
 subregion ends   8100000
 subregion starts   9600000
-makeup starts   10045790
 silence ends   10045790
+makeup starts   10045790
 makeup ends   11523290
-subregion starts   13200000
 subregion ends   13200000
+subregion starts   13200000
 subregion ends   16800000
 subregion starts   18300000
 subregion ends   21900000

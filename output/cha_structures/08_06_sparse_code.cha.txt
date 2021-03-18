@@ -19,10 +19,10 @@ skip ends   3622330
 skip starts   3625520
 skip ends   4030330
 skip starts   4150220
-silence starts   4769430
 skip ends   4769430
-skip starts   6470360
+silence starts   4769430
 silence ends   6470360
+skip starts   6470360
 skip ends   6998820
 skip starts   7977420
 skip ends   8223800

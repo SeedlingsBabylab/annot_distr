@@ -3,12 +3,12 @@ subregion ends   3900000
 silence starts   16119060
 silence ends   23861910
 subregion starts   25800000
-subregion starts   29400000
 subregion ends   29400000
-subregion starts   33000000
+subregion starts   29400000
 subregion ends   33000000
-subregion starts   36600000
+subregion starts   33000000
 subregion ends   36600000
+subregion starts   36600000
 subregion ends   40200000
 
 

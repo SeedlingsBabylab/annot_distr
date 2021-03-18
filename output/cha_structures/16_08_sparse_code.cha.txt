@@ -9,10 +9,10 @@ subregion ends   18300000
 silence starts   23770550
 silence ends   26935080
 subregion starts   27600000
-subregion starts   31200000
 subregion ends   31200000
-subregion starts   34800000
+subregion starts   31200000
 subregion ends   34800000
+subregion starts   34800000
 makeup starts   34802060
 makeup ends   35097020
 silence starts   35344330

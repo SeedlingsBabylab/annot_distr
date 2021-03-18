@@ -1,10 +1,10 @@
 silence starts   318710
 silence ends   487250
 skip starts   1116970
-silence starts   2049280
 skip ends   2049280
-skip starts   2920870
+silence starts   2049280
 silence ends   2920870
+skip starts   2920870
 skip ends   5279370
 silence starts   5970790
 silence ends   9075470
@@ -21,8 +21,8 @@ skip ends   30497290
 silence starts   31824130
 silence ends   32707530
 silence starts   32913060
-skip starts   33130750
 silence ends   33130750
+skip starts   33130750
 skip ends   33628040
 silence starts   35124680
 silence ends   35585160

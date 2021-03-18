@@ -9,8 +9,8 @@ skip starts   19591570
 skip ends   20511860
 skip starts   22340880
 skip ends   22824790
-subregion starts   23100000
 subregion ends   23100000
+subregion starts   23100000
 subregion ends   26700000
 silence starts   27805870
 silence ends   32850680

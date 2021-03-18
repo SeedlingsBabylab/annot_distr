@@ -11,8 +11,8 @@ subregion ends   22800000
 subregion starts   25200000
 makeup starts   25206300
 makeup ends   26186280
-subregion starts   28800000
 subregion ends   28800000
+subregion starts   28800000
 skip starts   31416920
 silence starts   32385630
 subregion ends   32400000
