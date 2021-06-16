@@ -279,6 +279,23 @@ at 14-17 months:
 
 Just one had < 5 subregions (`21_14` which was only 5.58 hours long)
 
+### Months 8-17 listened time with and without surplus:
+Here we provide the same tables above with the addition of with and without 
+surplus columns for total listen time for months 8-17. Note that we only include 
+files for which these two values are different (hence surplus time is not zero).
+
+```{r surplus}
+bind_rows(eight2thirteen, fourteen2seventeen) %>%
+    mutate(
+        without_surplus = total_listen_time_hour - surplus_time_hour
+    ) %>%
+    filter(
+        total_listen_time_hour != without_surplus
+    ) %>%
+  select(filename, total_listen_time_hour, without_surplus, everything()) %>%
+  knitr::kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered"), full_width = F, fixed_thead = T)
+```
 
 ## Positions and Ranks of subregions
 

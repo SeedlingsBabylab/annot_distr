@@ -9,8 +9,12 @@ subregion ends   12600000
 silence starts   12974410
 silence ends   23333790
 subregion starts   23700000
+skip starts   23738360
+skip ends   24455220
 subregion ends   27300000
 subregion starts   28500000
+skip starts   30131360
+skip ends   31199530
 subregion ends   32100000
 subregion starts   33600000
 subregion ends   37200000

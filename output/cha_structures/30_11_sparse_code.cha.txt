@@ -1,6 +1,8 @@
 subregion starts   10
 makeup starts   7030
 makeup ends   362950
+makeup starts   362950
+makeup ends   1803860
 subregion ends   3600000
 silence starts   8234630
 silence ends   8436930

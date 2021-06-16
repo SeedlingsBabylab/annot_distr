@@ -1,13 +1,9 @@
 subregion starts   0
-makeup starts   1470
 makeup starts   34120
-makeup ends   1339940
 makeup ends   3599340
 subregion ends   3600000
 subregion starts   3900000
-skip starts   6865610
 silence starts   7243890
-skip ends   7411880
 subregion ends   7500000
 silence ends   13442480
 subregion starts   13500000
@@ -28,7 +24,7 @@ silence starts   43861420
 silence ends   57599990
 
 
-Found a nesting! makeup end at 1339940 is nested between makeup start at 34120 and makeup end at 3599340
+
 Position: 1, Rank: 5
 Position: 2, Rank: 2
 Position: 3, Rank: 3

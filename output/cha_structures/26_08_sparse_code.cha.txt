@@ -7,8 +7,6 @@ subregion starts   12900000
 makeup ends   12902090
 skip starts   13793600
 skip ends   14473010
-skip starts   14669980
-skip ends   15016430
 subregion ends   16500000
 silence starts   18846110
 subregion starts   24000000
@@ -17,11 +15,11 @@ subregion ends   27600000
 subregion starts   30600000
 subregion ends   34200000
 extra starts   34201110
-extra ends   35072410
+extra ends   34629230
+surplus starts   34700360
+surplus ends   35072410
 subregion starts   36600000
-skip starts   37260710
-skip ends   37366090
-skip starts   39658880
+skip starts   39622620
 subregion ends   40200000
 skip ends   40200820
 silence starts   40294610

@@ -5,6 +5,8 @@ silence starts   10997340
 subregion ends   11100000
 silence ends   17400360
 subregion starts   18000000
+makeup starts   18090240
+makeup ends   19449200
 subregion ends   21600000
 subregion starts   22500000
 skip starts   24859070
